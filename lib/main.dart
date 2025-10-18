@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 import 'state/app_state.dart';
 import 'pages/dashboard_page.dart';
+import 'pages/home_page.dart';
+import 'pages/progress_overview_page.dart';
+import 'pages/leaderboard_page.dart';
+import 'pages/main_navigation.dart';
 import 'pages/lessons_page.dart';
 import 'pages/vocabulary_page.dart';
 import 'pages/quiz_page.dart';
@@ -12,23 +18,56 @@ import 'pages/onboarding_page.dart';
 import 'pages/word_match_page.dart';
 import 'pages/grammar_rush_page.dart';
 import 'pages/memory_cards_page.dart';
+import 'pages/games_page.dart';
 import 'pages/courses_list_page.dart';
 import 'pages/course_detail_page.dart';
 import 'pages/lesson_page.dart';
 import 'pages/course_quiz_page.dart';
 import 'pages/module_summary_page.dart';
+import 'pages/mentor_page.dart';
+import 'pages/mentor_detail_page.dart';
+import 'pages/login_page.dart';
+import 'pages/mock_login_page.dart';
+import 'providers/auth_provider.dart';
+import 'providers/mock_auth_provider.dart';
 
-void main() {
-  runApp(const BisaBasaApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  
+  // Mencoba inisialisasi Firebase dengan error handling
+  bool firebaseInitialized = false;
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+    firebaseInitialized = true;
+    print('✅ Firebase berhasil diinisialisasi');
+  } catch (e) {
+    print('⚠️ Firebase gagal diinisialisasi: $e');
+    print('🔄 Menggunakan Mock Authentication untuk development');
+    firebaseInitialized = false;
+  }
+  
+  runApp(BisaBasaApp(useFirebase: firebaseInitialized));
 }
 
 class BisaBasaApp extends StatelessWidget {
-  const BisaBasaApp({super.key});
+  final bool useFirebase;
+  
+  const BisaBasaApp({super.key, this.useFirebase = false});
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (context) => AppState(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => AppState()),
+        // Pilih provider berdasarkan status Firebase
+        ChangeNotifierProvider(
+          create: (context) => useFirebase 
+            ? AuthProvider() 
+            : MockAuthProvider(),
+        ),
+      ],
       child: MaterialApp.router(
         title: 'BisaBasa - English Learning',
         debugShowCheckedModeBanner: false,
@@ -84,8 +123,64 @@ final GoRouter _router = GoRouter(
   routes: [
     GoRoute(
       path: '/',
-      builder: (context, state) => const DashboardPage(),
+      pageBuilder: (context, state) => CustomTransitionPage<void>(
+        key: state.pageKey,
+        child: const MainNavigation(),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) =>
+            FadeTransition(
+          opacity: animation,
+          child: child,
+        ),
+      ),
     ),
+
+    GoRoute(
+      path: '/login',
+      pageBuilder: (context, state) => CustomTransitionPage(
+        key: state.pageKey,
+        child: const LoginPage(),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          return SlideTransition(
+            position: Tween<Offset>(
+              begin: const Offset(0.0, 1.0),
+              end: Offset.zero,
+            ).animate(CurvedAnimation(
+              parent: animation,
+              curve: Curves.easeInOut,
+            )),
+            child: FadeTransition(
+              opacity: animation,
+              child: child,
+            ),
+          );
+        },
+      ),
+    ),
+
+    // Mock Login Page untuk development tanpa Firebase
+    GoRoute(
+      path: '/mock-login',
+      pageBuilder: (context, state) => CustomTransitionPage(
+        key: state.pageKey,
+        child: const MockLoginPage(),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          return SlideTransition(
+            position: Tween<Offset>(
+              begin: const Offset(0.0, 1.0),
+              end: Offset.zero,
+            ).animate(CurvedAnimation(
+              parent: animation,
+              curve: Curves.easeInOut,
+            )),
+            child: FadeTransition(
+              opacity: animation,
+              child: child,
+            ),
+          );
+        },
+      ),
+    ),
+
     GoRoute(
       path: '/onboarding',
       pageBuilder: (context, state) => CustomTransitionPage(
@@ -204,6 +299,63 @@ final GoRouter _router = GoRouter(
             ),
           ),
           child: child,
+        ),
+      ),
+    ),
+    GoRoute(
+      path: '/games',
+      pageBuilder: (context, state) => CustomTransitionPage<void>(
+        key: state.pageKey,
+        child: const GamesPage(),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) =>
+            ScaleTransition(
+          scale: animation.drive(
+            Tween(begin: 0.8, end: 1.0).chain(
+              CurveTween(curve: Curves.elasticOut),
+            ),
+          ),
+          child: FadeTransition(
+            opacity: animation,
+            child: child,
+          ),
+        ),
+      ),
+    ),
+    GoRoute(
+      path: '/mentor',
+      pageBuilder: (context, state) => CustomTransitionPage<void>(
+        key: state.pageKey,
+        child: const MentorPage(),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) =>
+            SlideTransition(
+          position: animation.drive(
+            Tween(begin: const Offset(1.0, 0.0), end: Offset.zero).chain(
+              CurveTween(curve: Curves.easeInOut),
+            ),
+          ),
+          child: FadeTransition(
+            opacity: animation,
+            child: child,
+          ),
+        ),
+      ),
+    ),
+    GoRoute(
+      path: '/mentor-detail/:mentorId',
+      pageBuilder: (context, state) => CustomTransitionPage<void>(
+        key: state.pageKey,
+        child: MentorDetailPage(mentorId: state.pathParameters['mentorId']!),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) =>
+            SlideTransition(
+          position: animation.drive(
+            Tween(begin: const Offset(1.0, 0.0), end: Offset.zero).chain(
+              CurveTween(curve: Curves.easeInOut),
+            ),
+          ),
+          child: FadeTransition(
+            opacity: animation,
+            child: child,
+          ),
         ),
       ),
     ),

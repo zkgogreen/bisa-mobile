@@ -1,0 +1,9 @@
+# Folder untuk menyimpan ikon-ikon custom aplikasi
+# 
+# Contoh penggunaan:
+# - feature_games.png
+# - feature_mentor.png
+# - achievement_badge.png
+# - category_business.png
+#
+# Gunakan Image.asset('assets/icons/nama_icon.png') untuk mengakses

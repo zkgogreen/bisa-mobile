@@ -1,0 +1,9 @@
+# Folder untuk menyimpan gambar-gambar aplikasi
+# 
+# Contoh penggunaan:
+# - mentor_profile_1.png
+# - onboarding_illustration.png
+# - app_logo.png
+# - background_gradient.png
+#
+# Gunakan Image.asset('assets/images/nama_file.png') untuk mengakses

@@ -1,0 +1,9 @@
+# Folder untuk menyimpan file animasi
+# 
+# Contoh penggunaan:
+# - loading_animation.json (Lottie)
+# - success_celebration.json
+# - error_animation.gif
+# - onboarding_intro.json
+#
+# Untuk Lottie: gunakan package 'lottie' dan Lottie.asset('assets/animations/nama_file.json')
