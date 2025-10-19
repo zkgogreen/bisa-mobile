@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:bisabasa/widgets/app_brand_icon.dart';
 
 class OnboardingPage extends StatelessWidget {
   const OnboardingPage({super.key});
@@ -106,10 +107,8 @@ class OnboardingPage extends StatelessWidget {
                             ),
                           ],
                         ),
-                        child: const Icon(
-                          Icons.school,
+                        child: const AppBrandIcon(
                           size: 60,
-                          color: Colors.white,
                         ),
                       ),
                     ),

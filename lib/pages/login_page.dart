@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:bisabasa/widgets/app_brand_icon.dart';
 
 /// Halaman Login/Register dengan foto background yang jelas
 /// Form login berada di bagian bawah untuk memaksimalkan visibilitas foto
@@ -108,7 +109,16 @@ class _LoginPageState extends State<LoginPage>
 
   @override
   Widget build(BuildContext context) {
+    // Tambahkan ukuran layar untuk menentukan flex dinamis
+    final size = MediaQuery.of(context).size;
+    final isSmallHeight = size.height < 700;
+    final isTinyHeight = size.height < 580;
+    final topFlex = isTinyHeight ? 3 : (isSmallHeight ? 4 : 5);
+    final bottomFlex = isTinyHeight ? 7 : (isSmallHeight ? 6 : 5);
+    final bottomInset = MediaQuery.of(context).viewInsets.bottom;
+
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       body: Container(
         width: double.infinity,
         height: double.infinity,
@@ -123,19 +133,22 @@ class _LoginPageState extends State<LoginPage>
               ),
             ),
             
-            // Gradient overlay minimal untuk readability
+            // Gradient overlay minimal untuk readability (diabaikan gesture)
             Positioned.fill(
-              child: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Colors.transparent, // Bagian atas transparan total
-                      Colors.transparent, // Bagian tengah transparan
-                      Colors.black.withOpacity(0.3), // Sedikit gelap di bawah untuk readability
-                    ],
-                    stops: const [0.0, 0.6, 1.0], // Gradient hanya di 40% bawah
+              child: IgnorePointer(
+                ignoring: true,
+                child: Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.transparent, // Bagian atas transparan total
+                        Colors.transparent, // Bagian tengah transparan
+                        Colors.black.withOpacity(0.3), // Sedikit gelap di bawah untuk readability
+                      ],
+                      stops: const [0.0, 0.6, 1.0], // Gradient hanya di 40% bawah
+                    ),
                   ),
                 ),
               ),
@@ -163,9 +176,7 @@ class _LoginPageState extends State<LoginPage>
                     ),
                   ],
                 ),
-                child: const Icon(
-                  Icons.school,
-                  color: Colors.white,
+                child: const AppBrandIcon(
                   size: 30,
                 ),
               ),
@@ -176,20 +187,20 @@ class _LoginPageState extends State<LoginPage>
               child: Column(
                 children: [
                   // Spacer untuk memberikan ruang untuk foto tapi tidak terlalu besar
-                  const Expanded(
-                    flex: 5, // 5/10 dari layar untuk menampilkan foto (dikurangi dari 7)
-                    child: SizedBox(),
+                  Expanded(
+                    flex: topFlex, // 5/10 dari layar untuk menampilkan foto (dikurangi dari 7)
+                    child: const SizedBox(),
                   ),
                   
                   // Form login di bagian tengah-bawah
                   Expanded(
-                    flex: 5, // 5/10 dari layar untuk form (ditingkatkan dari 3)
+                    flex: bottomFlex, // 5/10 dari layar untuk form (ditingkatkan dari 3)
                     child: Padding(
-                      padding: const EdgeInsets.only(
+                      padding: EdgeInsets.only(
                         left: 20.0,
                         right: 20.0,
-                        bottom: 30.0, // Padding lebih besar dari bawah
-                        top: 10.0, // Tambah padding atas
+                        bottom: 30.0 + bottomInset, // Tambah padding sesuai tinggi keyboard/viewport
+                        top: 10.0,
                       ),
                       child: FadeTransition(
                         opacity: _fadeAnimation,
@@ -207,21 +218,26 @@ class _LoginPageState extends State<LoginPage>
                                 padding: const EdgeInsets.all(28.0), // Padding ditingkatkan sedikit
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(20),
-                                  color: Colors.white.withOpacity(0.95), // Background putih semi-transparan
+                                  color: Colors.white.withOpacity(0.50), // Background putih semi-transparan
                                 ),
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    _buildHeader(),
-                                    const SizedBox(height: 20), // Spacing ditingkatkan
-                                    _buildForm(),
-                                    const SizedBox(height: 12),
-                                    _buildErrorMessage(),
-                                    const SizedBox(height: 20),
-                                    _buildSubmitButton(),
-                                    const SizedBox(height: 12),
-                                    _buildToggleModeButton(),
-                                  ],
+                                child: SingleChildScrollView(
+                                  padding: const EdgeInsets.only(bottom: 8),
+                                  keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+                                  physics: const AlwaysScrollableScrollPhysics(),
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      _buildHeader(),
+                                      const SizedBox(height: 20), // Spacing ditingkatkan
+                                      _buildForm(),
+                                      const SizedBox(height: 12),
+                                      _buildErrorMessage(),
+                                      const SizedBox(height: 20),
+                                      _buildSubmitButton(),
+                                      const SizedBox(height: 12),
+                                      _buildToggleModeButton(),
+                                    ],
+                                  ),
                                 ),
                               ),
                             ),
@@ -304,6 +320,8 @@ class _LoginPageState extends State<LoginPage>
           TextFormField(
             controller: _emailController,
             keyboardType: TextInputType.emailAddress,
+            textInputAction: TextInputAction.next,
+            onFieldSubmitted: (_) => FocusScope.of(context).nextFocus(),
             style: const TextStyle(fontSize: 14), // Font lebih kecil
             decoration: InputDecoration(
               labelText: 'Email',
@@ -336,6 +354,8 @@ class _LoginPageState extends State<LoginPage>
           TextFormField(
             controller: _passwordController,
             obscureText: !_isPasswordVisible,
+            textInputAction: TextInputAction.done,
+            onFieldSubmitted: (_) => _handleLogin(),
             style: const TextStyle(fontSize: 14), // Font lebih kecil
             decoration: InputDecoration(
               labelText: 'Password',

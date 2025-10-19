@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../state/app_state.dart';
+import '../widgets/app_brand_icon.dart';
 
 class ProgressPage extends StatelessWidget {
   const ProgressPage({super.key});
@@ -123,10 +124,9 @@ class ProgressPage extends StatelessWidget {
                     color: Colors.white.withOpacity(0.2),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: const Icon(
-                    Icons.school,
-                    color: Colors.white,
+                  child: const AppBrandIcon(
                     size: 24,
+                    color: Colors.white,
                   ),
                 ),
                 const SizedBox(width: 16),

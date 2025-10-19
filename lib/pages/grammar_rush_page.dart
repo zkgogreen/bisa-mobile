@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'dart:async';
+import '../widgets/app_brand_icon.dart';
 
 // Model untuk soal Grammar Rush
 class GrammarQuestion {
@@ -606,7 +607,7 @@ class _GrammarRushPageState extends State<GrammarRushPage>
                           showTutorial = true;
                         });
                       },
-                      icon: const Icon(Icons.school),
+                      icon: const AppBrandIcon(size: 24, color: Colors.blue),
                       label: const Text('Tutorial'),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: Colors.blue,
@@ -911,8 +912,7 @@ class _GrammarRushPageState extends State<GrammarRushPage>
             ),
             child: Column(
               children: [
-                const Icon(
-                  Icons.school,
+                const AppBrandIcon(
                   size: 48,
                   color: Colors.blue,
                 ),

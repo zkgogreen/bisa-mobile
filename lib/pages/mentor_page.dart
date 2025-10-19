@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../models/mentor.dart';
 import '../data/mentor_data.dart';
+import '../widgets/app_brand_icon.dart';
 
 // Halaman Mentor untuk mencari dan memilih mentor
 class MentorPage extends StatefulWidget {
@@ -235,10 +236,9 @@ class _MentorPageState extends State<MentorPage> {
               color: Colors.white.withOpacity(0.2),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: const Icon(
-              Icons.school,
-              color: Colors.white,
+            child: const AppBrandIcon(
               size: 24,
+              color: Colors.white,
             ),
           ),
         ],
