@@ -426,7 +426,7 @@ class HomePage extends StatelessWidget {
               'Grammar',
               Icons.edit_outlined,
               const Color(0xFFFF9800),
-              '/grammar-rush',
+              '/games/grammar-rush',
             ),
             _buildQuickAccessCard(
               context,

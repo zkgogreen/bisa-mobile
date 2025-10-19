@@ -929,13 +929,13 @@ class _LessonsPageState extends State<LessonsPage> with TickerProviderStateMixin
     // Navigasi ke mini-games yang sudah dibuat
     switch (gameName) {
       case 'Word Match':
-        context.go('/word-match');
+        context.go('/games/word-match');
         break;
       case 'Grammar Rush':
-        context.go('/grammar-rush');
+        context.go('/games/grammar-rush');
         break;
       case 'Memory Cards':
-        context.go('/memory-cards');
+        context.go('/games/memory-cards');
         break;
       case 'Spelling Bee':
         // Spelling Bee belum dibuat, tampilkan dialog coming soon

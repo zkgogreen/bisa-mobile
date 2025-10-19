@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'firebase_options.dart';
 import 'state/app_state.dart';
 import 'pages/dashboard_page.dart';
 import 'pages/home_page.dart';
@@ -27,66 +25,61 @@ import 'pages/module_summary_page.dart';
 import 'pages/mentor_page.dart';
 import 'pages/mentor_detail_page.dart';
 import 'pages/login_page.dart';
-import 'pages/mock_login_page.dart';
 import 'providers/auth_provider.dart';
-import 'providers/mock_auth_provider.dart';
 
+/// Entry point aplikasi BisaBasa
+/// Aplikasi pembelajaran bahasa Inggris dengan sistem autentikasi sederhana
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-  // Mencoba inisialisasi Firebase dengan error handling
-  bool firebaseInitialized = false;
-  try {
-    await Firebase.initializeApp(
-      options: DefaultFirebaseOptions.currentPlatform,
-    );
-    firebaseInitialized = true;
-    print('✅ Firebase berhasil diinisialisasi');
-  } catch (e) {
-    print('⚠️ Firebase gagal diinisialisasi: $e');
-    print('🔄 Menggunakan Mock Authentication untuk development');
-    firebaseInitialized = false;
-  }
+  print('🚀 Memulai aplikasi BisaBasa...');
   
-  runApp(BisaBasaApp(useFirebase: firebaseInitialized));
+  runApp(const BisaBasaApp());
 }
 
+/// Widget utama aplikasi BisaBasa
+/// Menggunakan Material 3 design dengan tema modern
 class BisaBasaApp extends StatelessWidget {
-  final bool useFirebase;
-  
-  const BisaBasaApp({super.key, this.useFirebase = false});
+  const BisaBasaApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
+        // State management untuk aplikasi
         ChangeNotifierProvider(create: (context) => AppState()),
-        // Pilih provider berdasarkan status Firebase
-        ChangeNotifierProvider(
-          create: (context) => useFirebase 
-            ? AuthProvider() 
-            : MockAuthProvider(),
-        ),
+        
+        // Authentication provider untuk login/logout
+        ChangeNotifierProvider(create: (context) => AuthProvider()),
       ],
       child: MaterialApp.router(
         title: 'BisaBasa - English Learning',
         debugShowCheckedModeBanner: false,
+        
+        // Tema aplikasi dengan Material 3
         theme: ThemeData(
           useMaterial3: true,
           colorScheme: ColorScheme.fromSeed(
             seedColor: const Color(0xFF6750A4),
             brightness: Brightness.light,
           ),
+          
+          // Konfigurasi AppBar
           appBarTheme: const AppBarTheme(
-            centerTitle: true,
+            centerTitle: false,
             elevation: 0,
+            scrolledUnderElevation: 1,
           ),
+          
+          // Konfigurasi Card
           cardTheme: CardThemeData(
             elevation: 2,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
             ),
           ),
+          
+          // Konfigurasi Button
           elevatedButtonTheme: ElevatedButtonThemeData(
             style: ElevatedButton.styleFrom(
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
@@ -95,13 +88,16 @@ class BisaBasaApp extends StatelessWidget {
               ),
             ),
           ),
+          
+          // Konfigurasi Input Field
           inputDecorationTheme: InputDecorationTheme(
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
             ),
             filled: true,
           ),
-          // Add page transition animations
+          
+          // Animasi transisi halaman
           pageTransitionsTheme: const PageTransitionsTheme(
             builders: {
               TargetPlatform.android: CupertinoPageTransitionsBuilder(),
@@ -112,432 +108,324 @@ class BisaBasaApp extends StatelessWidget {
             },
           ),
         ),
+        
+        // Konfigurasi routing
         routerConfig: _router,
       ),
     );
   }
 }
 
-// Router configuration with smooth transitions
+/// Konfigurasi router untuk navigasi aplikasi
+/// Menggunakan GoRouter untuk navigasi yang smooth dan modern
 final GoRouter _router = GoRouter(
+  // Route awal aplikasi
+  initialLocation: '/',
+  
   routes: [
+    // Root route - redirect ke dashboard atau login
     GoRoute(
       path: '/',
-      pageBuilder: (context, state) => CustomTransitionPage<void>(
-        key: state.pageKey,
-        child: const MainNavigation(),
-        transitionsBuilder: (context, animation, secondaryAnimation, child) =>
-            FadeTransition(
-          opacity: animation,
-          child: child,
-        ),
-      ),
+      redirect: (context, state) {
+        final authProvider = Provider.of<AuthProvider>(context, listen: false);
+        return authProvider.isLoggedIn ? '/dashboard' : '/login';
+      },
     ),
-
+    
+    // Shell route untuk main navigation (hanya untuk user yang sudah login)
+    ShellRoute(
+      builder: (context, state, child) {
+        return MainNavigation(child: child);
+      },
+      routes: [
+        // Dashboard - halaman utama
+        GoRoute(
+          path: '/dashboard',
+          pageBuilder: (context, state) => _buildPage(
+            state: state,
+            child: const HomePage(),
+          ),
+        ),
+        
+        // Courses - daftar kursus
+        GoRoute(
+          path: '/courses',
+          pageBuilder: (context, state) => _buildPage(
+            state: state,
+            child: const CoursesListPage(),
+          ),
+          routes: [
+            // Detail kursus
+            GoRoute(
+              path: '/:courseId',
+              pageBuilder: (context, state) => _buildPage(
+                state: state,
+                child: CourseDetailPage(
+                  courseId: state.pathParameters['courseId']!,
+                ),
+              ),
+              routes: [
+                // Module routes
+                GoRoute(
+                  path: '/modules/:moduleId',
+                  pageBuilder: (context, state) => _buildPage(
+                    state: state,
+                    child: LessonPage(
+                      courseId: state.pathParameters['courseId']!,
+                      moduleId: state.pathParameters['moduleId']!,
+                      // lessonId is null for module overview
+                    ),
+                  ),
+                  routes: [
+                    // Lesson detail
+                    GoRoute(
+                      path: '/lessons/:lessonId',
+                      pageBuilder: (context, state) => _buildPage(
+                        state: state,
+                        child: LessonPage(
+                          courseId: state.pathParameters['courseId']!,
+                          moduleId: state.pathParameters['moduleId']!,
+                          lessonId: state.pathParameters['lessonId']!,
+                        ),
+                      ),
+                    ),
+                    // Module quiz
+                    GoRoute(
+                      path: '/quiz',
+                      pageBuilder: (context, state) => _buildPage(
+                        state: state,
+                        child: CourseQuizPage(
+                          courseId: state.pathParameters['courseId']!,
+                          moduleId: state.pathParameters['moduleId']!,
+                        ),
+                      ),
+                    ),
+                    // Module summary
+                    GoRoute(
+                      path: '/summary',
+                      pageBuilder: (context, state) => _buildPage(
+                        state: state,
+                        child: ModuleSummaryPage(
+                          courseId: state.pathParameters['courseId']!,
+                          moduleId: state.pathParameters['moduleId']!,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
+        
+        // Games - halaman permainan
+        GoRoute(
+          path: '/games',
+          pageBuilder: (context, state) => _buildPage(
+            state: state,
+            child: const GamesPage(),
+          ),
+          routes: [
+            // Word Match Game
+            GoRoute(
+              path: '/word-match',
+              pageBuilder: (context, state) => _buildPage(
+                state: state,
+                child: const WordMatchPage(),
+              ),
+            ),
+            // Grammar Rush Game
+            GoRoute(
+              path: '/grammar-rush',
+              pageBuilder: (context, state) => _buildPage(
+                state: state,
+                child: const GrammarRushPage(),
+              ),
+            ),
+            // Memory Cards Game
+            GoRoute(
+              path: '/memory-cards',
+              pageBuilder: (context, state) => _buildPage(
+                state: state,
+                child: const MemoryCardsPage(),
+              ),
+            ),
+          ],
+        ),
+        
+        // Progress - halaman progress
+        GoRoute(
+          path: '/progress',
+          pageBuilder: (context, state) => _buildPage(
+            state: state,
+            child: const ProgressOverviewPage(),
+          ),
+        ),
+        
+        // Lessons - halaman pelajaran
+         GoRoute(
+           path: '/lessons',
+           pageBuilder: (context, state) => _buildPage(
+             state: state,
+             child: const LessonsPage(),
+           ),
+           routes: [
+             // Detail lesson dengan courseId dan moduleId
+             GoRoute(
+               path: '/:courseId/:moduleId/:lessonId',
+               pageBuilder: (context, state) => _buildPage(
+                 state: state,
+                 child: LessonPage(
+                   courseId: state.pathParameters['courseId']!,
+                   moduleId: state.pathParameters['moduleId']!,
+                   lessonId: state.pathParameters['lessonId']!,
+                 ),
+               ),
+             ),
+           ],
+         ),
+        
+        // Vocabulary - halaman kosakata
+        GoRoute(
+          path: '/vocabulary',
+          pageBuilder: (context, state) => _buildPage(
+            state: state,
+            child: const VocabularyPage(),
+          ),
+        ),
+        
+        // Quiz - halaman kuis
+        GoRoute(
+          path: '/quiz',
+          pageBuilder: (context, state) => _buildPage(
+            state: state,
+            child: const QuizPage(),
+          ),
+        ),
+        
+        // Mentor - halaman mentor
+        GoRoute(
+          path: '/mentor',
+          pageBuilder: (context, state) => _buildPage(
+            state: state,
+            child: const MentorPage(),
+          ),
+          routes: [
+            // Detail mentor
+            GoRoute(
+              path: '/:mentorId',
+              pageBuilder: (context, state) => _buildPage(
+                state: state,
+                child: MentorDetailPage(
+                  mentorId: state.pathParameters['mentorId']!,
+                ),
+              ),
+            ),
+          ],
+        ),
+        
+        // Leaderboard - papan peringkat
+        GoRoute(
+          path: '/leaderboard',
+          pageBuilder: (context, state) => _buildPage(
+            state: state,
+            child: const LeaderboardPage(),
+          ),
+        ),
+      ],
+    ),
+    
+    // Login page - di luar shell route
     GoRoute(
       path: '/login',
-      pageBuilder: (context, state) => CustomTransitionPage(
-        key: state.pageKey,
+      pageBuilder: (context, state) => _buildPage(
+        state: state,
         child: const LoginPage(),
-        transitionsBuilder: (context, animation, secondaryAnimation, child) {
-          return SlideTransition(
-            position: Tween<Offset>(
-              begin: const Offset(0.0, 1.0),
-              end: Offset.zero,
-            ).animate(CurvedAnimation(
-              parent: animation,
-              curve: Curves.easeInOut,
-            )),
-            child: FadeTransition(
-              opacity: animation,
-              child: child,
-            ),
-          );
-        },
+        transition: _slideUpTransition,
       ),
     ),
-
-    // Mock Login Page untuk development tanpa Firebase
-    GoRoute(
-      path: '/mock-login',
-      pageBuilder: (context, state) => CustomTransitionPage(
-        key: state.pageKey,
-        child: const MockLoginPage(),
-        transitionsBuilder: (context, animation, secondaryAnimation, child) {
-          return SlideTransition(
-            position: Tween<Offset>(
-              begin: const Offset(0.0, 1.0),
-              end: Offset.zero,
-            ).animate(CurvedAnimation(
-              parent: animation,
-              curve: Curves.easeInOut,
-            )),
-            child: FadeTransition(
-              opacity: animation,
-              child: child,
-            ),
-          );
-        },
-      ),
-    ),
-
+    
+    // Onboarding page
     GoRoute(
       path: '/onboarding',
-      pageBuilder: (context, state) => CustomTransitionPage(
-        key: state.pageKey,
+      pageBuilder: (context, state) => _buildPage(
+        state: state,
         child: const OnboardingPage(),
-        transitionsBuilder: (context, animation, secondaryAnimation, child) {
-          return FadeTransition(
-            opacity: animation,
-            child: child,
-          );
-        },
-      ),
-    ),
-    GoRoute(
-      path: '/dashboard',
-      pageBuilder: (context, state) => CustomTransitionPage(
-        key: state.pageKey,
-        child: const DashboardPage(),
-        transitionsBuilder: (context, animation, secondaryAnimation, child) {
-          return SlideTransition(
-            position: Tween<Offset>(
-              begin: const Offset(1.0, 0.0),
-              end: Offset.zero,
-            ).animate(CurvedAnimation(
-              parent: animation,
-              curve: Curves.easeInOut,
-            )),
-            child: child,
-          );
-        },
-      ),
-    ),
-    GoRoute(
-      path: '/class-detail',
-      pageBuilder: (context, state) => CustomTransitionPage(
-        key: state.pageKey,
-        child: const ClassDetailPage(),
-        transitionsBuilder: (context, animation, secondaryAnimation, child) {
-          return SlideTransition(
-            position: Tween<Offset>(
-              begin: const Offset(1.0, 0.0),
-              end: Offset.zero,
-            ).animate(CurvedAnimation(
-              parent: animation,
-              curve: Curves.easeInOut,
-            )),
-            child: child,
-          );
-        },
-      ),
-    ),
-    GoRoute(
-      path: '/lessons',
-      pageBuilder: (context, state) => CustomTransitionPage(
-        key: state.pageKey,
-        child: const LessonsPage(),
-        transitionsBuilder: (context, animation, secondaryAnimation, child) {
-          return SlideTransition(
-            position: Tween<Offset>(
-              begin: const Offset(1.0, 0.0),
-              end: Offset.zero,
-            ).animate(CurvedAnimation(
-              parent: animation,
-              curve: Curves.easeInOut,
-            )),
-            child: child,
-          );
-        },
-      ),
-    ),
-    GoRoute(
-      path: '/vocabulary',
-      pageBuilder: (context, state) => CustomTransitionPage<void>(
-        key: state.pageKey,
-        child: const VocabularyPage(),
-        transitionsBuilder: (context, animation, secondaryAnimation, child) =>
-            SlideTransition(
-          position: animation.drive(
-            Tween(begin: const Offset(1.0, 0.0), end: Offset.zero).chain(
-              CurveTween(curve: Curves.easeInOut),
-            ),
-          ),
-          child: child,
-        ),
-      ),
-    ),
-    GoRoute(
-      path: '/quiz',
-      pageBuilder: (context, state) => CustomTransitionPage<void>(
-        key: state.pageKey,
-        child: const QuizPage(),
-        transitionsBuilder: (context, animation, secondaryAnimation, child) =>
-            ScaleTransition(
-          scale: animation.drive(
-            Tween(begin: 0.8, end: 1.0).chain(
-              CurveTween(curve: Curves.easeInOut),
-            ),
-          ),
-          child: FadeTransition(
-            opacity: animation,
-            child: child,
-          ),
-        ),
-      ),
-    ),
-    GoRoute(
-      path: '/progress',
-      pageBuilder: (context, state) => CustomTransitionPage<void>(
-        key: state.pageKey,
-        child: const ProgressPage(),
-        transitionsBuilder: (context, animation, secondaryAnimation, child) =>
-            SlideTransition(
-          position: animation.drive(
-            Tween(begin: const Offset(0.0, 1.0), end: Offset.zero).chain(
-              CurveTween(curve: Curves.easeInOut),
-            ),
-          ),
-          child: child,
-        ),
-      ),
-    ),
-    GoRoute(
-      path: '/games',
-      pageBuilder: (context, state) => CustomTransitionPage<void>(
-        key: state.pageKey,
-        child: const GamesPage(),
-        transitionsBuilder: (context, animation, secondaryAnimation, child) =>
-            ScaleTransition(
-          scale: animation.drive(
-            Tween(begin: 0.8, end: 1.0).chain(
-              CurveTween(curve: Curves.elasticOut),
-            ),
-          ),
-          child: FadeTransition(
-            opacity: animation,
-            child: child,
-          ),
-        ),
-      ),
-    ),
-    GoRoute(
-      path: '/mentor',
-      pageBuilder: (context, state) => CustomTransitionPage<void>(
-        key: state.pageKey,
-        child: const MentorPage(),
-        transitionsBuilder: (context, animation, secondaryAnimation, child) =>
-            SlideTransition(
-          position: animation.drive(
-            Tween(begin: const Offset(1.0, 0.0), end: Offset.zero).chain(
-              CurveTween(curve: Curves.easeInOut),
-            ),
-          ),
-          child: FadeTransition(
-            opacity: animation,
-            child: child,
-          ),
-        ),
-      ),
-    ),
-    GoRoute(
-      path: '/mentor-detail/:mentorId',
-      pageBuilder: (context, state) => CustomTransitionPage<void>(
-        key: state.pageKey,
-        child: MentorDetailPage(mentorId: state.pathParameters['mentorId']!),
-        transitionsBuilder: (context, animation, secondaryAnimation, child) =>
-            SlideTransition(
-          position: animation.drive(
-            Tween(begin: const Offset(1.0, 0.0), end: Offset.zero).chain(
-              CurveTween(curve: Curves.easeInOut),
-            ),
-          ),
-          child: FadeTransition(
-            opacity: animation,
-            child: child,
-          ),
-        ),
-      ),
-    ),
-    GoRoute(
-      path: '/word-match',
-      pageBuilder: (context, state) => CustomTransitionPage<void>(
-        key: state.pageKey,
-        child: const WordMatchPage(),
-        transitionsBuilder: (context, animation, secondaryAnimation, child) =>
-            ScaleTransition(
-          scale: animation.drive(
-            Tween(begin: 0.8, end: 1.0).chain(
-              CurveTween(curve: Curves.elasticOut),
-            ),
-          ),
-          child: FadeTransition(
-            opacity: animation,
-            child: child,
-          ),
-        ),
-      ),
-    ),
-    GoRoute(
-      path: '/grammar-rush',
-      pageBuilder: (context, state) => CustomTransitionPage<void>(
-        key: state.pageKey,
-        child: const GrammarRushPage(),
-        transitionsBuilder: (context, animation, secondaryAnimation, child) =>
-            SlideTransition(
-          position: animation.drive(
-            Tween(begin: const Offset(1.0, 0.0), end: Offset.zero).chain(
-              CurveTween(curve: Curves.easeInOut),
-            ),
-          ),
-          child: FadeTransition(
-            opacity: animation,
-            child: child,
-          ),
-        ),
-      ),
-    ),
-    GoRoute(
-      path: '/memory-cards',
-      pageBuilder: (context, state) => CustomTransitionPage<void>(
-        key: state.pageKey,
-        child: const MemoryCardsPage(),
-        transitionsBuilder: (context, animation, secondaryAnimation, child) =>
-            RotationTransition(
-          turns: animation.drive(
-            Tween(begin: 0.1, end: 0.0).chain(
-              CurveTween(curve: Curves.easeInOut),
-            ),
-          ),
-          child: ScaleTransition(
-            scale: animation.drive(
-              Tween(begin: 0.8, end: 1.0).chain(
-                CurveTween(curve: Curves.elasticOut),
-              ),
-            ),
-            child: child,
-          ),
-        ),
-      ),
-    ),
-    // Course routes
-    GoRoute(
-      path: '/courses',
-      pageBuilder: (context, state) => CustomTransitionPage<void>(
-        key: state.pageKey,
-        child: const CoursesListPage(),
-        transitionsBuilder: (context, animation, secondaryAnimation, child) =>
-            SlideTransition(
-          position: animation.drive(
-            Tween(begin: const Offset(1.0, 0.0), end: Offset.zero).chain(
-              CurveTween(curve: Curves.easeInOut),
-            ),
-          ),
-          child: child,
-        ),
-      ),
-    ),
-    GoRoute(
-      path: '/courses/:courseId',
-      pageBuilder: (context, state) => CustomTransitionPage<void>(
-        key: state.pageKey,
-        child: CourseDetailPage(courseId: state.pathParameters['courseId']!),
-        transitionsBuilder: (context, animation, secondaryAnimation, child) =>
-            SlideTransition(
-          position: animation.drive(
-            Tween(begin: const Offset(1.0, 0.0), end: Offset.zero).chain(
-              CurveTween(curve: Curves.easeInOut),
-            ),
-          ),
-          child: FadeTransition(
-            opacity: animation,
-            child: child,
-          ),
-        ),
-      ),
-    ),
-    GoRoute(
-      path: '/courses/:courseId/modules/:moduleId',
-      pageBuilder: (context, state) => CustomTransitionPage<void>(
-        key: state.pageKey,
-        child: LessonPage(
-          courseId: state.pathParameters['courseId']!,
-          moduleId: state.pathParameters['moduleId']!,
-        ),
-        transitionsBuilder: (context, animation, secondaryAnimation, child) =>
-            SlideTransition(
-          position: animation.drive(
-            Tween(begin: const Offset(1.0, 0.0), end: Offset.zero).chain(
-              CurveTween(curve: Curves.easeInOut),
-            ),
-          ),
-          child: child,
-        ),
-      ),
-    ),
-    GoRoute(
-      path: '/courses/:courseId/modules/:moduleId/lessons/:lessonId',
-      pageBuilder: (context, state) => CustomTransitionPage<void>(
-        key: state.pageKey,
-        child: LessonPage(
-          courseId: state.pathParameters['courseId']!,
-          moduleId: state.pathParameters['moduleId']!,
-          lessonId: state.pathParameters['lessonId'],
-        ),
-        transitionsBuilder: (context, animation, secondaryAnimation, child) =>
-            SlideTransition(
-          position: animation.drive(
-            Tween(begin: const Offset(1.0, 0.0), end: Offset.zero).chain(
-              CurveTween(curve: Curves.easeInOut),
-            ),
-          ),
-          child: child,
-        ),
-      ),
-    ),
-    GoRoute(
-      path: '/courses/:courseId/modules/:moduleId/summary',
-      pageBuilder: (context, state) => CustomTransitionPage<void>(
-        key: state.pageKey,
-        child: ModuleSummaryPage(
-          courseId: state.pathParameters['courseId']!,
-          moduleId: state.pathParameters['moduleId']!,
-        ),
-        transitionsBuilder: (context, animation, secondaryAnimation, child) =>
-            FadeTransition(
-          opacity: animation,
-          child: SlideTransition(
-            position: animation.drive(
-              Tween(begin: const Offset(0.0, 0.3), end: Offset.zero).chain(
-                CurveTween(curve: Curves.easeOutCubic),
-              ),
-            ),
-            child: child,
-          ),
-        ),
-      ),
-    ),
-    GoRoute(
-      path: '/courses/:courseId/modules/:moduleId/quiz',
-      pageBuilder: (context, state) => CustomTransitionPage<void>(
-        key: state.pageKey,
-        child: CourseQuizPage(
-          courseId: state.pathParameters['courseId']!,
-          moduleId: state.pathParameters['moduleId']!,
-        ),
-        transitionsBuilder: (context, animation, secondaryAnimation, child) =>
-            ScaleTransition(
-          scale: animation.drive(
-            Tween(begin: 0.8, end: 1.0).chain(
-              CurveTween(curve: Curves.elasticOut),
-            ),
-          ),
-          child: FadeTransition(
-            opacity: animation,
-            child: child,
-          ),
-        ),
+        transition: _fadeTransition,
       ),
     ),
   ],
+  
+  // Redirect logic untuk authentication
+  redirect: (context, state) {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final isLoggedIn = authProvider.isLoggedIn;
+    final currentLocation = state.matchedLocation;
+    
+    // Daftar halaman yang tidak memerlukan login
+    final publicRoutes = ['/login', '/onboarding'];
+    final isPublicRoute = publicRoutes.contains(currentLocation);
+    
+    print('🔄 Redirect check: location=$currentLocation, isLoggedIn=$isLoggedIn');
+    
+    // Jika belum login dan mencoba akses halaman yang memerlukan login
+    if (!isLoggedIn && !isPublicRoute) {
+      print('🚫 User belum login, redirect ke /login');
+      return '/login';
+    }
+    
+    // Jika sudah login dan di halaman login, redirect ke dashboard
+    if (isLoggedIn && currentLocation == '/login') {
+      print('✅ User sudah login, redirect ke /dashboard');
+      return '/dashboard';
+    }
+    
+    print('✅ No redirect needed');
+    return null; // Tidak ada redirect
+  },
 );
+
+/// Helper function untuk membuat page dengan transisi
+CustomTransitionPage _buildPage({
+  required GoRouterState state,
+  required Widget child,
+  Widget Function(BuildContext, Animation<double>, Animation<double>, Widget)? transition,
+}) {
+  return CustomTransitionPage<void>(
+    key: state.pageKey,
+    child: child,
+    transitionsBuilder: transition ?? _fadeTransition,
+  );
+}
+
+/// Transisi fade untuk halaman
+Widget _fadeTransition(
+  BuildContext context,
+  Animation<double> animation,
+  Animation<double> secondaryAnimation,
+  Widget child,
+) {
+  return FadeTransition(
+    opacity: animation,
+    child: child,
+  );
+}
+
+/// Transisi slide up untuk halaman login
+Widget _slideUpTransition(
+  BuildContext context,
+  Animation<double> animation,
+  Animation<double> secondaryAnimation,
+  Widget child,
+) {
+  return SlideTransition(
+    position: Tween<Offset>(
+      begin: const Offset(0.0, 1.0),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(
+      parent: animation,
+      curve: Curves.easeInOut,
+    )),
+    child: child,
+  );
+}

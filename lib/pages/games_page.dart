@@ -161,7 +161,7 @@ class GamesPage extends StatelessWidget {
                 'Perbaiki kalimat dengan cepat!',
                 '⚡',
                 const Color(0xFFEC4899),
-                '/grammar-rush',
+                '/games/grammar-rush',
                 'Tingkatkan grammar dengan permainan cepat',
               ),
               _buildFeaturedGameCard(
@@ -170,7 +170,7 @@ class GamesPage extends StatelessWidget {
                 'Ingat vocabulary dengan kartu',
                 '🧠',
                 const Color(0xFF10B981),
-                '/memory-cards',
+                '/games/memory-cards',
                 'Latih memori dan vocabulary',
               ),
               _buildFeaturedGameCard(
@@ -179,7 +179,7 @@ class GamesPage extends StatelessWidget {
                 'Cocokkan kata dengan gambar',
                 '🎯',
                 const Color(0xFF6366F1),
-                '/word-match',
+                '/games/word-match',
                 'Belajar vocabulary dengan visual',
               ),
             ],
@@ -319,7 +319,7 @@ class GamesPage extends StatelessWidget {
               'Cocokkan kata dengan gambar',
               Icons.extension,
               const Color(0xFF6366F1),
-              '/word-match',
+              '/games/word-match',
               'Beginner',
             ),
             _buildGameCard(
@@ -328,7 +328,7 @@ class GamesPage extends StatelessWidget {
               'Perbaiki kalimat cepat',
               Icons.speed,
               const Color(0xFFEC4899),
-              '/grammar-rush',
+              '/games/grammar-rush',
               'Intermediate',
             ),
             _buildGameCard(
@@ -337,7 +337,7 @@ class GamesPage extends StatelessWidget {
               'Ingat vocabulary',
               Icons.psychology,
               const Color(0xFF10B981),
-              '/memory-cards',
+              '/games/memory-cards',
               'All Levels',
             ),
             _buildComingSoonCard(

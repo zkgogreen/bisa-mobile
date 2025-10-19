@@ -281,7 +281,7 @@ class _MentorPageState extends State<MentorPage> {
         ],
       ),
       child: InkWell(
-        onTap: () => context.push('/mentor-detail/${mentor.id}'),
+        onTap: () => context.push('/mentor/${mentor.id}'),
         borderRadius: BorderRadius.circular(16),
         child: Padding(
           padding: const EdgeInsets.all(16),

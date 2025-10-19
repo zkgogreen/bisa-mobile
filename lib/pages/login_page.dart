@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 import 'package:go_router/go_router.dart';
 
-/// Halaman Login dengan Google Sign-In
-/// Menggunakan background poster yang indah dan UI modern
+/// Halaman Login/Register dengan foto background yang jelas
+/// Form login berada di bagian bawah untuk memaksimalkan visibilitas foto
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
 
@@ -12,112 +10,100 @@ class LoginPage extends StatefulWidget {
   State<LoginPage> createState() => _LoginPageState();
 }
 
-class _LoginPageState extends State<LoginPage> 
-    with SingleTickerProviderStateMixin {
-  
-  // Controller untuk animasi
-  late AnimationController _animationController;
+class _LoginPageState extends State<LoginPage>
+    with TickerProviderStateMixin {
+  // Controllers untuk input field
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _nameController = TextEditingController();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
+  // State variables
+  bool _isPasswordVisible = false;
+  bool _isRegisterMode = false;
+  String _errorMessage = '';
+
+  // Animation controllers untuk efek visual
+  late AnimationController _fadeController;
+  late AnimationController _slideController;
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
-  
-  // Loading state untuk button
-  bool _isLoading = false;
-  
-  // Firebase Auth dan Google Sign-In instances
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final GoogleSignIn _googleSignIn = GoogleSignIn();
 
   @override
   void initState() {
     super.initState();
     
-    // Setup animasi untuk entrance effect
-    _animationController = AnimationController(
-      duration: const Duration(milliseconds: 1500),
+    // Inisialisasi animasi
+    _fadeController = AnimationController(
+      duration: const Duration(milliseconds: 1000),
       vsync: this,
     );
     
+    _slideController = AnimationController(
+      duration: const Duration(milliseconds: 800),
+      vsync: this,
+    );
+
     _fadeAnimation = Tween<double>(
       begin: 0.0,
       end: 1.0,
     ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: const Interval(0.0, 0.8, curve: Curves.easeOut),
+      parent: _fadeController,
+      curve: Curves.easeInOut,
     ));
-    
+
     _slideAnimation = Tween<Offset>(
       begin: const Offset(0, 0.3),
       end: Offset.zero,
     ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: const Interval(0.2, 1.0, curve: Curves.easeOut),
+      parent: _slideController,
+      curve: Curves.easeOutBack,
     ));
-    
+
     // Mulai animasi
-    _animationController.forward();
+    _fadeController.forward();
+    _slideController.forward();
   }
 
   @override
   void dispose() {
-    _animationController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    _nameController.dispose();
+    _fadeController.dispose();
+    _slideController.dispose();
     super.dispose();
   }
 
-  /// Fungsi untuk login dengan Google
-  Future<void> _signInWithGoogle() async {
-    setState(() {
-      _isLoading = true;
-    });
+  /// Fungsi untuk menangani proses login
+  void _handleLogin() async {
+    if (_formKey.currentState!.validate()) {
+      setState(() {
+        _errorMessage = '';
+      });
 
-    try {
-      // Trigger the authentication flow
-      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
-      
-      if (googleUser == null) {
-        // User canceled the sign-in
-        setState(() {
-          _isLoading = false;
-        });
-        return;
-      }
-
-      // Obtain the auth details from the request
-      final GoogleSignInAuthentication googleAuth = 
-          await googleUser.authentication;
-
-      // Create a new credential
-      final credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
-      );
-
-      // Sign in to Firebase with the Google credential
-      final UserCredential userCredential = 
-          await _auth.signInWithCredential(credential);
-      
-      if (userCredential.user != null) {
-        // Login berhasil, navigasi ke dashboard
+      try {
+        // Simulasi proses login/register
+        await Future.delayed(const Duration(seconds: 1));
+        
         if (mounted) {
-          context.go('/dashboard');
+          // Navigasi ke halaman utama setelah berhasil login
+          context.go('/');
         }
-      }
-    } catch (e) {
-      // Handle error
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Login gagal: ${e.toString()}'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    } finally {
-      if (mounted) {
+      } catch (e) {
         setState(() {
-          _isLoading = false;
+          _errorMessage = 'Login gagal. Silakan coba lagi.';
         });
       }
     }
+  }
+
+  /// Fungsi untuk toggle antara mode login dan register
+  void _toggleMode() {
+    setState(() {
+      _isRegisterMode = !_isRegisterMode;
+      _errorMessage = '';
+    });
   }
 
   @override
@@ -126,231 +112,351 @@ class _LoginPageState extends State<LoginPage>
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: const BoxDecoration(
-          // Background menggunakan poster image
-          image: DecorationImage(
-            image: AssetImage('assets/images/poster.jpg'),
-            fit: BoxFit.cover,
-          ),
-        ),
-        child: Container(
-          // Overlay gradient untuk readability
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                Colors.black.withOpacity(0.3),
-                Colors.black.withOpacity(0.7),
-              ],
+        child: Stack(
+          children: [
+            // Background image dengan opacity yang lebih tinggi
+            Positioned.fill(
+              child: Image.asset(
+                'assets/images/poster.jpg',
+                fit: BoxFit.cover,
+                opacity: const AlwaysStoppedAnimation(0.4), // Opacity ditingkatkan untuk visibility
+              ),
             ),
-          ),
-          child: SafeArea(
-            child: AnimatedBuilder(
-              animation: _animationController,
-              builder: (context, child) {
-                return FadeTransition(
-                  opacity: _fadeAnimation,
-                  child: SlideTransition(
-                    position: _slideAnimation,
+            
+            // Gradient overlay minimal untuk readability
+            Positioned.fill(
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.transparent, // Bagian atas transparan total
+                      Colors.transparent, // Bagian tengah transparan
+                      Colors.black.withOpacity(0.3), // Sedikit gelap di bawah untuk readability
+                    ],
+                    stops: const [0.0, 0.6, 1.0], // Gradient hanya di 40% bawah
+                  ),
+                ),
+              ),
+            ),
+            
+            // Logo di pojok kiri atas
+            Positioned(
+              top: 50,
+              left: 20,
+              child: Container(
+                width: 60,
+                height: 60,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Colors.orange.shade400, Colors.deepOrange.shade600],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(15),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.orange.withOpacity(0.3),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: const Icon(
+                  Icons.school,
+                  color: Colors.white,
+                  size: 30,
+                ),
+              ),
+            ),
+            
+            // Main content dengan form di posisi yang lebih seimbang
+            SafeArea(
+              child: Column(
+                children: [
+                  // Spacer untuk memberikan ruang untuk foto tapi tidak terlalu besar
+                  const Expanded(
+                    flex: 5, // 5/10 dari layar untuk menampilkan foto (dikurangi dari 7)
+                    child: SizedBox(),
+                  ),
+                  
+                  // Form login di bagian tengah-bawah
+                  Expanded(
+                    flex: 5, // 5/10 dari layar untuk form (ditingkatkan dari 3)
                     child: Padding(
-                      padding: const EdgeInsets.all(24.0),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          // Spacer untuk push content ke tengah
-                          const Spacer(),
-                          
-                          // Logo dan Welcome Text
-                          _buildWelcomeSection(),
-                          
-                          const SizedBox(height: 60),
-                          
-                          // Google Sign-In Button
-                          _buildGoogleSignInButton(),
-                          
-                          const SizedBox(height: 24),
-                          
-                          // Terms and Privacy
-                          _buildTermsText(),
-                          
-                          const Spacer(),
-                          
-                          // Skip untuk guest mode (opsional)
-                          _buildSkipButton(),
-                        ],
+                      padding: const EdgeInsets.only(
+                        left: 20.0,
+                        right: 20.0,
+                        bottom: 30.0, // Padding lebih besar dari bawah
+                        top: 10.0, // Tambah padding atas
+                      ),
+                      child: FadeTransition(
+                        opacity: _fadeAnimation,
+                        child: SlideTransition(
+                          position: _slideAnimation,
+                          child: ConstrainedBox(
+                            constraints: const BoxConstraints(maxWidth: 400),
+                            child: Card(
+                              elevation: 25,
+                              shadowColor: Colors.black.withOpacity(0.5),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Container(
+                                padding: const EdgeInsets.all(28.0), // Padding ditingkatkan sedikit
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(20),
+                                  color: Colors.white.withOpacity(0.95), // Background putih semi-transparan
+                                ),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    _buildHeader(),
+                                    const SizedBox(height: 20), // Spacing ditingkatkan
+                                    _buildForm(),
+                                    const SizedBox(height: 12),
+                                    _buildErrorMessage(),
+                                    const SizedBox(height: 20),
+                                    _buildSubmitButton(),
+                                    const SizedBox(height: 12),
+                                    _buildToggleModeButton(),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
                       ),
                     ),
                   ),
-                );
-              },
+                ],
+              ),
             ),
-          ),
+          ],
         ),
       ),
     );
   }
 
-  /// Widget untuk section welcome
-  Widget _buildWelcomeSection() {
+  /// Widget untuk header (hanya judul tanpa logo)
+  Widget _buildHeader() {
     return Column(
       children: [
-        // App Logo/Icon
-        Container(
-          width: 100,
-          height: 100,
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.9),
-            borderRadius: BorderRadius.circular(20),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.2),
-                blurRadius: 20,
-                offset: const Offset(0, 10),
-              ),
-            ],
-          ),
-          child: const Icon(
-            Icons.school,
-            size: 50,
-            color: Color(0xFF2196F3),
-          ),
-        ),
-        
-        const SizedBox(height: 32),
-        
-        // Welcome Text
-        const Text(
-          'Selamat Datang di',
-          style: TextStyle(
-            fontSize: 18,
-            color: Colors.white70,
-            fontWeight: FontWeight.w300,
-          ),
-        ),
-        
-        const SizedBox(height: 8),
-        
-        // App Name
-        const Text(
+        // Judul aplikasi
+        Text(
           'BisaBasa',
-          style: TextStyle(
-            fontSize: 42,
-            color: Colors.white,
+          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
             fontWeight: FontWeight.bold,
-            letterSpacing: 1.2,
+            color: Colors.orange.shade700,
           ),
         ),
-        
-        const SizedBox(height: 16),
-        
+        const SizedBox(height: 8),
         // Subtitle
-        const Text(
-          'Belajar bahasa Inggris dengan mudah\ndan menyenangkan',
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontSize: 16,
-            color: Colors.white70,
-            height: 1.5,
+        Text(
+          _isRegisterMode ? 'Daftar Akun Baru' : 'Masuk ke Akun Anda',
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+            color: Colors.grey.shade600,
+            fontWeight: FontWeight.w500,
           ),
         ),
       ],
     );
   }
 
-  /// Widget untuk Google Sign-In Button
-  Widget _buildGoogleSignInButton() {
-    return Container(
-      width: double.infinity,
-      height: 56,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.2),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
+  /// Widget untuk form input - dibuat lebih kompak
+  Widget _buildForm() {
+    return Form(
+      key: _formKey,
+      child: Column(
+        children: [
+          // Input nama (hanya untuk register)
+          if (_isRegisterMode) ...[
+            TextFormField(
+              controller: _nameController,
+              style: const TextStyle(fontSize: 14), // Font lebih kecil
+              decoration: InputDecoration(
+                labelText: 'Nama Lengkap',
+                labelStyle: const TextStyle(fontSize: 14),
+                prefixIcon: Icon(Icons.person_outline, color: Colors.orange.shade600, size: 20),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: BorderSide(color: Colors.orange.shade600, width: 2),
+                ),
+                filled: true,
+                fillColor: Colors.orange.shade50,
+                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12), // Padding dikurangi
+              ),
+              validator: (value) {
+                if (_isRegisterMode && (value == null || value.isEmpty)) {
+                  return 'Nama tidak boleh kosong';
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: 12), // Dikurangi
+          ],
+          
+          // Input email
+          TextFormField(
+            controller: _emailController,
+            keyboardType: TextInputType.emailAddress,
+            style: const TextStyle(fontSize: 14), // Font lebih kecil
+            decoration: InputDecoration(
+              labelText: 'Email',
+              labelStyle: const TextStyle(fontSize: 14),
+              prefixIcon: Icon(Icons.email_outlined, color: Colors.orange.shade600, size: 20),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide(color: Colors.orange.shade600, width: 2),
+              ),
+              filled: true,
+              fillColor: Colors.orange.shade50,
+              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12), // Padding dikurangi
+            ),
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Email tidak boleh kosong';
+              }
+              if (!value.contains('@')) {
+                return 'Format email tidak valid';
+              }
+              return null;
+            },
+          ),
+          const SizedBox(height: 12), // Dikurangi
+          
+          // Input password
+          TextFormField(
+            controller: _passwordController,
+            obscureText: !_isPasswordVisible,
+            style: const TextStyle(fontSize: 14), // Font lebih kecil
+            decoration: InputDecoration(
+              labelText: 'Password',
+              labelStyle: const TextStyle(fontSize: 14),
+              prefixIcon: Icon(Icons.lock_outline, color: Colors.orange.shade600, size: 20),
+              suffixIcon: IconButton(
+                icon: Icon(
+                  _isPasswordVisible ? Icons.visibility_off : Icons.visibility,
+                  color: Colors.orange.shade600,
+                  size: 20,
+                ),
+                onPressed: () {
+                  setState(() {
+                    _isPasswordVisible = !_isPasswordVisible;
+                  });
+                },
+              ),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide(color: Colors.orange.shade600, width: 2),
+              ),
+              filled: true,
+              fillColor: Colors.orange.shade50,
+              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12), // Padding dikurangi
+            ),
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Password tidak boleh kosong';
+              }
+              if (value.length < 6) {
+                return 'Password minimal 6 karakter';
+              }
+              return null;
+            },
           ),
         ],
       ),
+    );
+  }
+
+  /// Widget untuk menampilkan pesan error
+  Widget _buildErrorMessage() {
+    if (_errorMessage.isEmpty) return const SizedBox.shrink();
+    
+    return Container(
+      padding: const EdgeInsets.all(10), // Dikurangi
+      decoration: BoxDecoration(
+        color: Colors.red.shade50,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.red.shade200),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.error_outline, color: Colors.red.shade600, size: 18), // Dikurangi
+          const SizedBox(width: 6),
+          Expanded(
+            child: Text(
+              _errorMessage,
+              style: TextStyle(
+                color: Colors.red.shade700,
+                fontSize: 12, // Dikurangi
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Widget untuk tombol submit (login/register)
+  Widget _buildSubmitButton() {
+    return SizedBox(
+      width: double.infinity,
+      height: 44, // Dikurangi lagi
       child: ElevatedButton(
-        onPressed: _isLoading ? null : _signInWithGoogle,
+        onPressed: _handleLogin,
         style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.white,
-          foregroundColor: Colors.black87,
-          elevation: 0,
+          backgroundColor: Colors.orange.shade600,
+          foregroundColor: Colors.white,
+          elevation: 8,
+          shadowColor: Colors.orange.withOpacity(0.4),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(10),
           ),
         ),
-        child: _isLoading
-            ? const SizedBox(
-                width: 24,
-                height: 24,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
-                ),
-              )
-            : Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  // Google Icon
-                  Image.asset(
-                    'assets/icons/google_icon.png',
-                    width: 24,
-                    height: 24,
-                    errorBuilder: (context, error, stackTrace) {
-                      // Fallback jika icon tidak ada
-                      return const Icon(
-                        Icons.login,
-                        size: 24,
-                        color: Colors.blue,
-                      );
-                    },
-                  ),
-                  
-                  const SizedBox(width: 16),
-                  
-                  const Text(
-                    'Masuk dengan Google',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
+        child: Text(
+          _isRegisterMode ? 'Daftar' : 'Masuk',
+          style: const TextStyle(
+            fontSize: 14, // Dikurangi
+            fontWeight: FontWeight.bold,
+            letterSpacing: 0.5,
+          ),
+        ),
       ),
     );
   }
 
-  /// Widget untuk Terms and Privacy text
-  Widget _buildTermsText() {
-    return Text(
-      'Dengan masuk, Anda menyetujui Syarat & Ketentuan\ndan Kebijakan Privasi kami',
-      textAlign: TextAlign.center,
-      style: TextStyle(
-        fontSize: 12,
-        color: Colors.white.withOpacity(0.7),
-        height: 1.4,
-      ),
-    );
-  }
-
-  /// Widget untuk Skip button (guest mode)
-  Widget _buildSkipButton() {
+  /// Widget untuk tombol toggle mode (login/register)
+  Widget _buildToggleModeButton() {
     return TextButton(
-      onPressed: () {
-        // Navigasi ke dashboard tanpa login (guest mode)
-        context.go('/dashboard');
-      },
-      child: Text(
-        'Lewati untuk sekarang',
-        style: TextStyle(
-          fontSize: 14,
-          color: Colors.white.withOpacity(0.8),
-          decoration: TextDecoration.underline,
+      onPressed: _toggleMode,
+      child: RichText(
+        text: TextSpan(
+          style: TextStyle(color: Colors.grey.shade600, fontSize: 12), // Dikurangi
+          children: [
+            TextSpan(
+              text: _isRegisterMode 
+                  ? 'Sudah punya akun? ' 
+                  : 'Belum punya akun? ',
+            ),
+            TextSpan(
+              text: _isRegisterMode ? 'Masuk' : 'Daftar',
+              style: TextStyle(
+                color: Colors.orange.shade600,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
         ),
       ),
     );

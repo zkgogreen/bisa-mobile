@@ -117,10 +117,6 @@ class _LessonPageState extends State<LessonPage> {
     if (_isLoading) {
       return Scaffold(
         key: _scaffoldKey,
-        appBar: AppBar(
-          backgroundColor: const Color(0xFF2196F3),
-          foregroundColor: Colors.white,
-        ),
         body: const Center(
           child: CircularProgressIndicator(),
         ),
@@ -130,11 +126,6 @@ class _LessonPageState extends State<LessonPage> {
     if (_course == null || _module == null) {
       return Scaffold(
         key: _scaffoldKey,
-        appBar: AppBar(
-          title: const Text('Not Found'),
-          backgroundColor: const Color(0xFF2196F3),
-          foregroundColor: Colors.white,
-        ),
         body: const Center(
           child: Text('Course atau Module tidak ditemukan'),
         ),
@@ -144,14 +135,21 @@ class _LessonPageState extends State<LessonPage> {
     return Scaffold(
       key: _scaffoldKey,
       backgroundColor: Colors.grey[50],
-      appBar: _buildAppBar(),
       drawer: _buildDrawer(),
-      body: _currentLesson != null 
-          ? _buildLessonContent() 
-          : _buildModuleOverview(),
-      bottomNavigationBar: _currentLesson != null 
-          ? _buildBottomNavigation() 
-          : null,
+      body: SafeArea(
+        child: Column(
+          children: [
+            // Custom title header
+            _buildCustomHeader(),
+            // Main content
+            Expanded(
+              child: _currentLesson != null 
+                  ? _buildLessonContent() 
+                  : _buildModuleOverview(),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -179,6 +177,58 @@ class _LessonPageState extends State<LessonPage> {
       ],
     );
   }
+
+  // Widget untuk custom header (menggantikan AppBar)
+  Widget _buildCustomHeader() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xFF2196F3),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          // Back button
+          IconButton(
+            icon: const Icon(Icons.arrow_back, color: Colors.white),
+            onPressed: () => Navigator.of(context).pop(),
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(),
+          ),
+          const SizedBox(width: 12),
+          // Title
+          Expanded(
+            child: Text(
+              _currentLesson?.title ?? _module!.title,
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: Colors.white,
+              ),
+            ),
+          ),
+          // Menu button
+          IconButton(
+            icon: const Icon(Icons.menu, color: Colors.white),
+            onPressed: () {
+              _scaffoldKey.currentState?.openDrawer();
+            },
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(),
+          ),
+        ],
+      ),
+    );
+  }
+
+
 
   // Widget untuk drawer dengan navigasi module
   Widget _buildDrawer() {

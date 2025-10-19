@@ -238,33 +238,6 @@ class _MentorDetailPageState extends State<MentorDetailPage> {
           ),
         ],
       ),
-      floatingActionButton: Container(
-        width: double.infinity,
-        margin: const EdgeInsets.symmetric(horizontal: 20),
-        child: FloatingActionButton.extended(
-          onPressed: _isLoading ? null : _showBookingDialog,
-          backgroundColor: const Color(0xFF6750A4),
-          foregroundColor: Colors.white,
-          label: _isLoading
-              ? const SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(
-                    color: Colors.white,
-                    strokeWidth: 2,
-                  ),
-                )
-              : Text(
-                  'Book Session - \$${_mentor!.pricePerHour.toInt()}/hour',
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-          icon: _isLoading ? null : const Icon(Icons.calendar_today),
-        ),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 
