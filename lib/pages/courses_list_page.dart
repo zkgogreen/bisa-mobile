@@ -96,11 +96,13 @@ class _CoursesListPageState extends State<CoursesListPage> {
           style: TextStyle(
             fontWeight: FontWeight.bold,
             color: Colors.white,
+            fontSize: 18,
           ),
         ),
         backgroundColor: const Color(0xFF2196F3),
         elevation: 0,
         centerTitle: true,
+        toolbarHeight: 44,
       ),
       body: Column(
         children: [
@@ -121,12 +123,12 @@ class _CoursesListPageState extends State<CoursesListPage> {
   // Widget untuk header section dengan search dan filter
   Widget _buildHeaderSection() {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: const BoxDecoration(
         color: Color(0xFF2196F3),
         borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(24),
-          bottomRight: Radius.circular(24),
+          bottomLeft: Radius.circular(16),
+          bottomRight: Radius.circular(16),
         ),
       ),
       child: Column(
@@ -135,12 +137,12 @@ class _CoursesListPageState extends State<CoursesListPage> {
           Container(
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(8),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
+                  color: Colors.black.withOpacity(0.06),
+                  blurRadius: 3,
+                  offset: const Offset(0, 1),
                 ),
               ],
             ),
@@ -149,16 +151,17 @@ class _CoursesListPageState extends State<CoursesListPage> {
                 _searchQuery = value;
                 _filterCourses();
               },
+              style: const TextStyle(fontSize: 13),
               decoration: const InputDecoration(
                 hintText: 'Cari course...',
-                prefixIcon: Icon(Icons.search, color: Colors.grey),
+                prefixIcon: Icon(Icons.search, color: Colors.grey, size: 18),
                 border: InputBorder.none,
-                contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
               ),
             ),
           ),
           
-          const SizedBox(height: 16),
+          const SizedBox(height: 10),
           
           // Filter chips
           Row(
@@ -173,45 +176,56 @@ class _CoursesListPageState extends State<CoursesListPage> {
                       style: TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.w600,
-                        fontSize: 12,
+                        fontSize: 9,
                       ),
                     ),
                     const SizedBox(height: 4),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(8),
+                    DropdownButtonFormField<String>(
+                      value: _selectedCategory,
+                      isExpanded: true,
+                      isDense: true,
+                      dropdownColor: Colors.white,
+                      style: const TextStyle(color: Colors.white, fontSize: 12),
+                      icon: const Icon(Icons.arrow_drop_down, color: Colors.white, size: 18),
+                      decoration: InputDecoration(
+                        filled: true,
+                        fillColor: Colors.white.withOpacity(0.14),
+                        isDense: true,
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(color: Colors.white24),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: const BorderSide(color: Colors.white24),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: const BorderSide(color: Colors.white, width: 1),
+                        ),
                       ),
-                      child: DropdownButton<String>(
-                        value: _selectedCategory,
-                        isExpanded: true,
-                        underline: const SizedBox(),
-                        dropdownColor: Colors.white,
-                        style: const TextStyle(color: Colors.white),
-                        icon: const Icon(Icons.arrow_drop_down, color: Colors.white),
-                        items: _categories.map((category) {
-                          return DropdownMenuItem(
-                            value: category,
-                            child: Text(
-                              category,
-                              style: const TextStyle(color: Colors.black87),
-                            ),
-                          );
-                        }).toList(),
-                        onChanged: (value) {
-                          setState(() {
-                            _selectedCategory = value!;
-                          });
-                          _filterCourses();
-                        },
-                      ),
+                      items: _categories.map((category) {
+                        return DropdownMenuItem(
+                          value: category,
+                          child: Text(
+                            category,
+                            style: const TextStyle(color: Colors.black87, fontSize: 12),
+                          ),
+                        );
+                      }).toList(),
+                      onChanged: (value) {
+                        setState(() {
+                          _selectedCategory = value!;
+                        });
+                        _filterCourses();
+                      },
                     ),
                   ],
                 ),
               ),
               
-              const SizedBox(width: 12),
+              const SizedBox(width: 8),
               
               // Level filter
               Expanded(
@@ -223,39 +237,50 @@ class _CoursesListPageState extends State<CoursesListPage> {
                       style: TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.w600,
-                        fontSize: 12,
+                        fontSize: 9,
                       ),
                     ),
                     const SizedBox(height: 4),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(8),
+                    DropdownButtonFormField<String>(
+                      value: _selectedLevel,
+                      isExpanded: true,
+                      isDense: true,
+                      dropdownColor: Colors.white,
+                      style: const TextStyle(color: Colors.white, fontSize: 12),
+                      icon: const Icon(Icons.arrow_drop_down, color: Colors.white, size: 18),
+                      decoration: InputDecoration(
+                        filled: true,
+                        fillColor: Colors.white.withOpacity(0.14),
+                        isDense: true,
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(color: Colors.white24),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: const BorderSide(color: Colors.white24),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: const BorderSide(color: Colors.white, width: 1),
+                        ),
                       ),
-                      child: DropdownButton<String>(
-                        value: _selectedLevel,
-                        isExpanded: true,
-                        underline: const SizedBox(),
-                        dropdownColor: Colors.white,
-                        style: const TextStyle(color: Colors.white),
-                        icon: const Icon(Icons.arrow_drop_down, color: Colors.white),
-                        items: _levels.map((level) {
-                          return DropdownMenuItem(
-                            value: level,
-                            child: Text(
-                              level,
-                              style: const TextStyle(color: Colors.black87),
-                            ),
-                          );
-                        }).toList(),
-                        onChanged: (value) {
-                          setState(() {
-                            _selectedLevel = value!;
-                          });
-                          _filterCourses();
-                        },
-                      ),
+                      items: _levels.map((level) {
+                        return DropdownMenuItem(
+                          value: level,
+                          child: Text(
+                            level,
+                            style: const TextStyle(color: Colors.black87, fontSize: 12),
+                          ),
+                        );
+                      }).toList(),
+                      onChanged: (value) {
+                        setState(() {
+                          _selectedLevel = value!;
+                        });
+                        _filterCourses();
+                      },
                     ),
                   ],
                 ),
@@ -270,7 +295,7 @@ class _CoursesListPageState extends State<CoursesListPage> {
   // Widget untuk menampilkan daftar courses
   Widget _buildCoursesList() {
     return ListView.builder(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(12),
       itemCount: _filteredCourses.length,
       itemBuilder: (context, index) {
         final course = _filteredCourses[index];
@@ -282,15 +307,15 @@ class _CoursesListPageState extends State<CoursesListPage> {
   // Widget untuk card course individual
   Widget _buildCourseCard(Course course) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 16),
+      margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.08),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
+            color: Colors.black.withOpacity(0.06),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
           ),
         ],
       ),
@@ -299,7 +324,7 @@ class _CoursesListPageState extends State<CoursesListPage> {
           // Navigasi ke halaman detail course
           context.go('/courses/${course.id}');
         },
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(12),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -307,12 +332,12 @@ class _CoursesListPageState extends State<CoursesListPage> {
             Stack(
               children: [
                 Container(
-                  height: 160,
+                  height: 130,
                   width: double.infinity,
                   decoration: BoxDecoration(
                     borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(16),
-                      topRight: Radius.circular(16),
+                      topLeft: Radius.circular(12),
+                      topRight: Radius.circular(12),
                     ),
                     image: DecorationImage(
                       image: NetworkImage(course.imageUrl),
@@ -368,7 +393,7 @@ class _CoursesListPageState extends State<CoursesListPage> {
             
             // Course content
             Padding(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(12),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -377,7 +402,7 @@ class _CoursesListPageState extends State<CoursesListPage> {
                     children: [
                       Icon(
                         _getCategoryIcon(course.category),
-                        size: 16,
+                        size: 14,
                         color: const Color(0xFF2196F3),
                       ),
                       const SizedBox(width: 4),
@@ -385,30 +410,30 @@ class _CoursesListPageState extends State<CoursesListPage> {
                         course.category,
                         style: const TextStyle(
                           color: Color(0xFF2196F3),
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
                     ],
                   ),
                   
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 6),
                   
                   Text(
                     course.title,
                     style: const TextStyle(
-                      fontSize: 18,
+                      fontSize: 16,
                       fontWeight: FontWeight.bold,
                       color: Colors.black87,
                     ),
                   ),
                   
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 6),
                   
                   Text(
                     course.description,
                     style: TextStyle(
-                      fontSize: 14,
+                      fontSize: 13,
                       color: Colors.grey[600],
                       height: 1.4,
                     ),
@@ -416,22 +441,22 @@ class _CoursesListPageState extends State<CoursesListPage> {
                     overflow: TextOverflow.ellipsis,
                   ),
                   
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 10),
                   
                   // Course stats
                   Row(
                     children: [
                       _buildStatItem(Icons.play_circle_outline, '${course.totalModules} Modules'),
-                      const SizedBox(width: 16),
+                      const SizedBox(width: 12),
                       _buildStatItem(Icons.book_outlined, '${course.totalLessons} Lessons'),
-                      const SizedBox(width: 16),
+                      const SizedBox(width: 12),
                       _buildStatItem(Icons.access_time, '${course.estimatedHours}h'),
                     ],
                   ),
                   
                   // Progress bar (jika sudah enrolled)
                   if (course.isEnrolled) ...[
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 8),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -441,7 +466,7 @@ class _CoursesListPageState extends State<CoursesListPage> {
                             const Text(
                               'Progress',
                               style: TextStyle(
-                                fontSize: 12,
+                                fontSize: 11,
                                 fontWeight: FontWeight.w600,
                                 color: Colors.black87,
                               ),
@@ -480,7 +505,7 @@ class _CoursesListPageState extends State<CoursesListPage> {
       children: [
         Icon(
           icon,
-          size: 16,
+          size: 14,
           color: Colors.grey[600],
         ),
         const SizedBox(width: 4),
