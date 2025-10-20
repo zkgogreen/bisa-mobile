@@ -26,7 +26,7 @@ class _CourseQuizPageState extends State<CourseQuizPage> with TickerProviderStat
   
   // Quiz state
   int _currentQuestionIndex = 0;
-  Map<int, String> _userAnswers = {};
+  final Map<int, String> _userAnswers = {};
   bool _isQuizStarted = false;
   bool _isQuizCompleted = false;
   int _score = 0;

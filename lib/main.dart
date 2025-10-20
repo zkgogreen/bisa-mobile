@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'state/app_state.dart';
-import 'pages/dashboard_page.dart';
 import 'pages/home_page.dart';
 import 'pages/progress_overview_page.dart';
 import 'pages/leaderboard_page.dart';
@@ -10,8 +9,6 @@ import 'pages/main_navigation.dart';
 import 'pages/lessons_page.dart';
 import 'pages/vocabulary_page.dart';
 import 'pages/quiz_page.dart';
-import 'pages/progress_page.dart';
-import 'pages/class_detail_page.dart';
 import 'pages/onboarding_page.dart';
 import 'pages/word_match_page.dart';
 import 'pages/grammar_rush_page.dart';
@@ -358,25 +355,13 @@ final GoRouter _router = GoRouter(
   
   // Redirect logic untuk authentication
   redirect: (context, state) {
-    final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    final isLoggedIn = authProvider.isLoggedIn;
     final currentLocation = state.matchedLocation;
     
-    // Daftar halaman yang tidak memerlukan login
-    final publicRoutes = ['/login', '/onboarding'];
-    final isPublicRoute = publicRoutes.contains(currentLocation);
+    print('🔄 Redirect check: location=$currentLocation (LOGIN BYPASS MODE)');
     
-    print('🔄 Redirect check: location=$currentLocation, isLoggedIn=$isLoggedIn');
-    
-    // Jika belum login dan mencoba akses halaman yang memerlukan login
-    if (!isLoggedIn && !isPublicRoute) {
-      print('🚫 User belum login, redirect ke /login');
-      return '/login';
-    }
-    
-    // Jika sudah login dan di halaman login, redirect ke dashboard
-    if (isLoggedIn && currentLocation == '/login') {
-      print('✅ User sudah login, redirect ke /dashboard');
+    // BYPASS LOGIN: Langsung redirect ke dashboard jika di root atau login
+    if (currentLocation == '/' || currentLocation == '/login') {
+      print('🚀 Bypass login, redirect ke /dashboard');
       return '/dashboard';
     }
     

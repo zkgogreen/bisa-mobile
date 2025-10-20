@@ -470,9 +470,9 @@ class _WordMatchPageState extends State<WordMatchPage>
           return Transform.scale(
             scale: image.isMatched ? _matchAnimation.value : 1.0,
             child: DragTarget<String>(
-              onAccept: (wordId) {
+              onAcceptWithDetails: (wordId) {
                 if (wordId == image.id) {
-                  _handleSuccessfulMatch(wordId);
+                  _handleSuccessfulMatch(wordId as String);
                 } else {
                   // Match salah
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -484,7 +484,7 @@ class _WordMatchPageState extends State<WordMatchPage>
                   );
                 }
               },
-              onWillAccept: (wordId) => !image.isMatched,
+              onWillAcceptWithDetails: (wordId) => !image.isMatched,
               builder: (context, candidateData, rejectedData) {
                 final isHovering = candidateData.isNotEmpty;
                 final isCorrectHover = candidateData.contains(image.id);

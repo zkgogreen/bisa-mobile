@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import 'package:bisabasa/widgets/app_brand_icon.dart';
+import 'package:bisabasa/providers/auth_provider.dart';
 
 /// Halaman Login/Register dengan foto background yang jelas
 /// Form login berada di bagian bawah untuk memaksimalkan visibilitas foto
@@ -84,17 +86,44 @@ class _LoginPageState extends State<LoginPage>
       });
 
       try {
-        // Simulasi proses login/register
-        await Future.delayed(const Duration(seconds: 1));
+        final authProvider = Provider.of<AuthProvider>(context, listen: false);
         
-        if (mounted) {
-          // Navigasi ke halaman utama setelah berhasil login
-          context.go('/');
+        bool success;
+        if (_isRegisterMode) {
+          // Mode registrasi
+          success = await authProvider.registerWithEmailAndPassword(
+            _emailController.text.trim(),
+            _passwordController.text,
+            _nameController.text.trim(),
+          );
+        } else {
+          // Mode login
+          success = await authProvider.signInWithEmailAndPassword(
+            _emailController.text.trim(),
+            _passwordController.text,
+          );
+        }
+        
+        if (success && mounted) {
+          // Navigasi ke halaman utama setelah berhasil login/register
+          context.go('/dashboard');
+        } else if (mounted) {
+          setState(() {
+            if (_isRegisterMode) {
+              _errorMessage = 'Registrasi gagal. Pastikan email valid, password minimal 6 karakter, dan nama tidak kosong.';
+            } else {
+              _errorMessage = 'Login gagal. Pastikan email dan password benar (minimal 6 karakter).';
+            }
+          });
         }
       } catch (e) {
-        setState(() {
-          _errorMessage = 'Login gagal. Silakan coba lagi.';
-        });
+        if (mounted) {
+          setState(() {
+            _errorMessage = _isRegisterMode 
+                ? 'Registrasi gagal. Silakan coba lagi.' 
+                : 'Login gagal. Silakan coba lagi.';
+          });
+        }
       }
     }
   }
@@ -119,7 +148,7 @@ class _LoginPageState extends State<LoginPage>
 
     return Scaffold(
       resizeToAvoidBottomInset: true,
-      body: Container(
+      body: SizedBox(
         width: double.infinity,
         height: double.infinity,
         child: Stack(
@@ -430,29 +459,42 @@ class _LoginPageState extends State<LoginPage>
 
   /// Widget untuk tombol submit (login/register)
   Widget _buildSubmitButton() {
-    return SizedBox(
-      width: double.infinity,
-      height: 44, // Dikurangi lagi
-      child: ElevatedButton(
-        onPressed: _handleLogin,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.orange.shade600,
-          foregroundColor: Colors.white,
-          elevation: 8,
-          shadowColor: Colors.orange.withOpacity(0.4),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
+    return Consumer<AuthProvider>(
+      builder: (context, authProvider, child) {
+        return SizedBox(
+          width: double.infinity,
+          height: 44, // Dikurangi lagi
+          child: ElevatedButton(
+            onPressed: authProvider.isLoading ? null : _handleLogin,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.orange.shade600,
+              foregroundColor: Colors.white,
+              elevation: 8,
+              shadowColor: Colors.orange.withOpacity(0.4),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            child: authProvider.isLoading
+                ? const SizedBox(
+                    height: 20,
+                    width: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                    ),
+                  )
+                : Text(
+                    _isRegisterMode ? 'Daftar' : 'Masuk',
+                    style: const TextStyle(
+                      fontSize: 14, // Dikurangi
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
           ),
-        ),
-        child: Text(
-          _isRegisterMode ? 'Daftar' : 'Masuk',
-          style: const TextStyle(
-            fontSize: 14, // Dikurangi
-            fontWeight: FontWeight.bold,
-            letterSpacing: 0.5,
-          ),
-        ),
-      ),
+        );
+      },
     );
   }
 

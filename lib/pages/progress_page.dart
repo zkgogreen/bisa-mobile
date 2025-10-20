@@ -363,7 +363,7 @@ class ProgressPage extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: isActive 
                         ? const Color(0xFFFF9800) 
-                        : Theme.of(context).colorScheme.surfaceVariant,
+                        : Theme.of(context).colorScheme.surfaceContainerHighest,
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Center(
@@ -448,7 +448,7 @@ class ProgressPage extends StatelessWidget {
                       borderRadius: BorderRadius.circular(12),
                       color: isUnlocked 
                           ? (achievement['color'] as Color).withOpacity(0.1)
-                          : Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.5),
+                          : Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.5),
                     ),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -458,7 +458,7 @@ class ProgressPage extends StatelessWidget {
                           decoration: BoxDecoration(
                             color: isUnlocked 
                                 ? (achievement['color'] as Color).withOpacity(0.2)
-                                : Theme.of(context).colorScheme.surfaceVariant,
+                                : Theme.of(context).colorScheme.surfaceContainerHighest,
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Icon(

@@ -23,16 +23,31 @@ class AuthProvider with ChangeNotifier {
   }
 
   /// Memuat data user dari SharedPreferences
+  /// BYPASS MODE: Set default user sebagai logged in
   Future<void> _loadUserData() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      _isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
-      _userEmail = prefs.getString('userEmail');
-      _userDisplayName = prefs.getString('userDisplayName');
-      _userPhotoURL = prefs.getString('userPhotoURL');
+      
+      // BYPASS LOGIN: Set default logged in dengan user dummy
+      _isLoggedIn = true;
+      _userEmail = 'demo@bisabasa.com';
+      _userDisplayName = 'Demo User';
+      _userPhotoURL = 'https://ui-avatars.com/api/?name=Demo+User&background=ff6b35&color=fff';
+      
+      // Simpan data default ke SharedPreferences jika belum ada
+      if (!prefs.containsKey('isLoggedIn')) {
+        await _saveUserData();
+      }
+      
       notifyListeners();
     } catch (e) {
       debugPrint('Error loading user data: $e');
+      // Fallback ke default user jika ada error
+      _isLoggedIn = true;
+      _userEmail = 'demo@bisabasa.com';
+      _userDisplayName = 'Demo User';
+      _userPhotoURL = 'https://ui-avatars.com/api/?name=Demo+User&background=ff6b35&color=fff';
+      notifyListeners();
     }
   }
 

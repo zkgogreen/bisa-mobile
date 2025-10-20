@@ -3,7 +3,6 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../state/app_state.dart';
 import '../models/lesson.dart';
-import 'dart:math' as math;
 
 class LessonsPage extends StatefulWidget {
   const LessonsPage({super.key});

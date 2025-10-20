@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
-import '../state/app_state.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -33,8 +31,6 @@ class HomePage extends StatelessWidget {
                     
                     const SizedBox(height: 24),
                     
-                    // Quick access cards
-                    _buildQuickAccessSection(context),
                     
                     const SizedBox(height: 24),
                     
@@ -380,116 +376,6 @@ class HomePage extends StatelessWidget {
             }),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildQuickAccessSection(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Quick Access',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: Color(0xFF1A1A1A),
-          ),
-        ),
-        
-        const SizedBox(height: 16),
-        
-        GridView.count(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          crossAxisCount: 2,
-          crossAxisSpacing: 16,
-          mainAxisSpacing: 16,
-          childAspectRatio: 1.2,
-          children: [
-            _buildQuickAccessCard(
-              context,
-              'Vocabulary',
-              Icons.book_outlined,
-              const Color(0xFF4CAF50),
-              '/vocabulary',
-            ),
-            _buildQuickAccessCard(
-              context,
-              'Quiz',
-              Icons.quiz_outlined,
-              const Color(0xFF2196F3),
-              '/quiz',
-            ),
-            _buildQuickAccessCard(
-              context,
-              'Grammar',
-              Icons.edit_outlined,
-              const Color(0xFFFF9800),
-              '/games/grammar-rush',
-            ),
-            _buildQuickAccessCard(
-              context,
-              'Progress',
-              Icons.trending_up,
-              const Color(0xFF9C27B0),
-              '/progress-overview',
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildQuickAccessCard(
-    BuildContext context,
-    String title,
-    IconData icon,
-    Color color,
-    String route,
-  ) {
-    return GestureDetector(
-      onTap: () => context.push(route),
-      child: Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 20,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(
-                color: color.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Icon(
-                icon,
-                color: color,
-                size: 24,
-              ),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              title,
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF1A1A1A),
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }

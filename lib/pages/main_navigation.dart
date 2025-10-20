@@ -92,12 +92,10 @@ class _MainNavigationState extends State<MainNavigation> {
        builder: (context, authProvider, child) {
          return Scaffold(
            // App Bar
-           appBar: _buildAppBar(context, authProvider, colorScheme),
+           appBar: null,
            
            // Drawer (hanya tampil jika user login)
-           drawer: authProvider.isLoggedIn 
-               ? _buildDrawer(context, authProvider, colorScheme)
-               : null,
+           drawer: null,
            
            // Body content
            body: widget.child,
@@ -117,136 +115,10 @@ class _MainNavigationState extends State<MainNavigation> {
     AuthProvider authProvider, 
     ColorScheme colorScheme,
   ) {
-    return AppBar(
-      title: const Text(
-        'BisaBasa',
-        style: TextStyle(
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-      centerTitle: false,
-      elevation: 0,
-      scrolledUnderElevation: 1,
-      leading: authProvider.isLoggedIn 
-          ? Builder(
-              builder: (context) => IconButton(
-                icon: const Icon(Icons.menu),
-                onPressed: () => Scaffold.of(context).openDrawer(),
-              ),
-            )
-          : null,
-      actions: [
-        if (authProvider.isLoggedIn) ...[
-          // Notification button
-          IconButton(
-            icon: const Icon(Icons.notifications_outlined),
-            onPressed: () {
-              // TODO: Implement notifications
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Fitur notifikasi akan segera hadir!'),
-                ),
-              );
-            },
-          ),
-          
-          // User profile menu
-          PopupMenuButton<String>(
-            icon: CircleAvatar(
-              radius: 16,
-              backgroundImage: authProvider.userPhotoURL != null
-                  ? NetworkImage(authProvider.userPhotoURL!)
-                  : null,
-              backgroundColor: colorScheme.primary,
-              child: authProvider.userPhotoURL == null
-                  ? Icon(
-                      Icons.person,
-                      size: 20,
-                      color: colorScheme.onPrimary,
-                    )
-                  : null,
-            ),
-            onSelected: (value) async {
-              switch (value) {
-                case 'profile':
-                  // TODO: Navigate to profile page
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Halaman profil akan segera hadir!'),
-                    ),
-                  );
-                  break;
-                case 'settings':
-                  // TODO: Navigate to settings page
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Halaman pengaturan akan segera hadir!'),
-                    ),
-                  );
-                  break;
-                case 'logout':
-                  await _handleLogout(context, authProvider);
-                  break;
-              }
-            },
-            itemBuilder: (context) => [
-              PopupMenuItem(
-                value: 'profile',
-                child: Row(
-                  children: [
-                    const Icon(Icons.person_outline),
-                    const SizedBox(width: 12),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          authProvider.userDisplayName ?? 'User',
-                          style: const TextStyle(fontWeight: FontWeight.w600),
-                        ),
-                        if (authProvider.userEmail != null)
-                          Text(
-                            authProvider.userEmail!,
-                            style: Theme.of(context).textTheme.bodySmall,
-                          ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              const PopupMenuDivider(),
-              const PopupMenuItem(
-                value: 'settings',
-                child: Row(
-                  children: [
-                    Icon(Icons.settings_outlined),
-                    SizedBox(width: 12),
-                    Text('Pengaturan'),
-                  ],
-                ),
-              ),
-              const PopupMenuItem(
-                value: 'logout',
-                child: Row(
-                  children: [
-                    Icon(Icons.logout_outlined),
-                    SizedBox(width: 12),
-                    Text('Keluar'),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ] else ...[
-          // Login button untuk user yang belum login
-          TextButton.icon(
-            onPressed: () => context.go('/login'),
-            icon: const Icon(Icons.login),
-            label: const Text('Masuk'),
-          ),
-          const SizedBox(width: 8),
-        ],
-      ],
+    // AppBar di-nonaktifkan: kembalikan ukuran 0 agar tidak terlihat
+    return const PreferredSize(
+      preferredSize: Size.fromHeight(0),
+      child: SizedBox.shrink(),
     );
   }
 

@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
-import '../state/app_state.dart';
 
 class DashboardPage extends StatelessWidget {
   const DashboardPage({super.key});
@@ -26,10 +24,6 @@ class DashboardPage extends StatelessWidget {
                     // Today Class section
                     _buildTodayClassSection(context),
                     
-                    const SizedBox(height: 32),
-                    
-                    // Quick Navigation section
-                    _buildQuickNavigationSection(context),
                     
                     const SizedBox(height: 32),
                     
@@ -283,134 +277,6 @@ class DashboardPage extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-
-  Widget _buildQuickNavigationSection(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Quick Access',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: Color(0xFF1A1A1A),
-          ),
-        ),
-        
-        const SizedBox(height: 16),
-        
-        Row(
-          children: [
-            Expanded(
-              child: _buildQuickNavCard(
-                context,
-                'Courses',
-                'Structured learning',
-                Icons.school_outlined,
-                const Color(0xFFFF9800),
-                () => context.go('/courses'),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _buildQuickNavCard(
-                context,
-                'Lessons',
-                'Learn new topics',
-                Icons.book_outlined,
-                const Color(0xFF6750A4),
-                () => context.go('/lessons'),
-              ),
-            ),
-          ],
-        ),
-        
-        const SizedBox(height: 12),
-        
-        Row(
-          children: [
-            Expanded(
-              child: _buildQuickNavCard(
-                context,
-                'Vocabulary',
-                'Practice words',
-                Icons.translate,
-                const Color(0xFFE91E63),
-                () => context.go('/vocabulary'),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _buildQuickNavCard(
-                context,
-                'Quiz',
-                'Test yourself',
-                Icons.quiz_outlined,
-                const Color(0xFF4CAF50),
-                () => context.go('/quiz'),
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildQuickNavCard(BuildContext context, String title, String subtitle, 
-      IconData icon, Color color, VoidCallback onTap) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 10,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Column(
-          children: [
-            Container(
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(
-                color: color.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Icon(
-                icon,
-                color: color,
-                size: 24,
-              ),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              title,
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: Color(0xFF1A1A1A),
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              subtitle,
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey[600],
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-      ),
     );
   }
 

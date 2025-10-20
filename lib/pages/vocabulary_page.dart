@@ -68,7 +68,7 @@ class _VocabularyPageState extends State<VocabularyPage> {
                   // Search bar
                   Container(
                     decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.surfaceVariant,
+                      color: Theme.of(context).colorScheme.surfaceContainerHighest,
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: TextField(
@@ -115,7 +115,7 @@ class _VocabularyPageState extends State<VocabularyPage> {
                                     _selectedCategory = category;
                                   });
                                 },
-                                backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
+                                backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
                                 selectedColor: const Color(0xFF4CAF50).withOpacity(0.2),
                                 checkmarkColor: const Color(0xFF4CAF50),
                               ),
@@ -263,7 +263,7 @@ class _VocabularyPageState extends State<VocabularyPage> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.surfaceVariant,
+                      color: Theme.of(context).colorScheme.surfaceContainerHighest,
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
@@ -403,7 +403,7 @@ class _VocabularyPageState extends State<VocabularyPage> {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                         decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.surfaceVariant,
+                          color: Theme.of(context).colorScheme.surfaceContainerHighest,
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Row(

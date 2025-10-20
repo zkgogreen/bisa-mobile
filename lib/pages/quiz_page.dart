@@ -290,7 +290,7 @@ class _QuizPageState extends State<QuizPage> with TickerProviderStateMixin {
                                 height: 32,
                                 decoration: BoxDecoration(
                                   color: textColor?.withOpacity(0.1) ?? 
-                                         Theme.of(context).colorScheme.surfaceVariant,
+                                         Theme.of(context).colorScheme.surfaceContainerHighest,
                                   shape: BoxShape.circle,
                                 ),
                                 child: Center(
