@@ -318,9 +318,9 @@ class _MemoryCardsPageState extends State<MemoryCardsPage>
           ElevatedButton(
             onPressed: () {
               Navigator.of(context).pop();
-              context.go('/lessons');
+              context.go('/games');
             },
-            child: const Text('Back to Lessons'),
+            child: const Text('Back to Games'),
           ),
         ],
       ),
@@ -346,7 +346,7 @@ class _MemoryCardsPageState extends State<MemoryCardsPage>
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.go('/lessons'),
+          onPressed: () => context.go('/games'),
         ),
         actions: [
           if (gameActive) ...[

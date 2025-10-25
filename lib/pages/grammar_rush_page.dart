@@ -410,9 +410,9 @@ class _GrammarRushPageState extends State<GrammarRushPage>
           ElevatedButton(
             onPressed: () {
               Navigator.of(context).pop();
-              context.go('/lessons');
+              context.go('/games');
             },
-            child: const Text('Back to Lessons'),
+            child: const Text('Back to Games'),
           ),
         ],
       ),
@@ -452,7 +452,7 @@ class _GrammarRushPageState extends State<GrammarRushPage>
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.go('/lessons'),
+          onPressed: () => context.go('/games'),
         ),
         actions: [
           if (gameActive) ...[
@@ -652,152 +652,159 @@ class _GrammarRushPageState extends State<GrammarRushPage>
       builder: (context, child) {
         return Transform.scale(
           scale: _questionAnimation.value,
-          child: Column(
-            children: [
-              // Progress indicator
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
-                      blurRadius: 4,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  children: [
-                    Text(
-                      'Question ${currentQuestionIndex + 1}/${questions.length}',
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    LinearProgressIndicator(
-                      value: (currentQuestionIndex + 1) / questions.length,
-                      backgroundColor: Colors.grey.shade300,
-                      valueColor: const AlwaysStoppedAnimation<Color>(Colors.blue),
-                    ),
-                  ],
-                ),
-              ),
-              
-              const SizedBox(height: 24),
-              
-              // Question
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [Colors.red.shade50, Colors.orange.shade50],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.red.shade200),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      '❌ Find the mistake:',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.red,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      question.incorrectSentence,
-                      style: const TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              
-              const SizedBox(height: 24),
-              
-              // Options
-              const Text(
-                'Choose the correct word:',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 16),
-              
-              Expanded(
-                child: ListView.builder(
-                  itemCount: question.options.length,
-                  itemBuilder: (context, index) {
-                    return _buildOptionButton(question, index);
-                  },
-                ),
-              ),
-              
-              // Explanation
-              if (showExplanation) ...[
-                const SizedBox(height: 16),
+          child: SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            child: Column(
+              children: [
+                // Progress indicator
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: selectedAnswerIndex == question.correctAnswerIndex
-                        ? Colors.green.shade50
-                        : Colors.orange.shade50,
+                    color: Colors.white,
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: selectedAnswerIndex == question.correctAnswerIndex
-                          ? Colors.green
-                          : Colors.orange,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 4,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    children: [
+                      Text(
+                        'Question ${currentQuestionIndex + 1}/${questions.length}',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      LinearProgressIndicator(
+                        value: (currentQuestionIndex + 1) / questions.length,
+                        backgroundColor: Colors.grey.shade300,
+                        valueColor: const AlwaysStoppedAnimation<Color>(Colors.blue),
+                      ),
+                    ],
+                  ),
+                ),
+                
+                const SizedBox(height: 24),
+                
+                // Question
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [Colors.red.shade50, Colors.orange.shade50],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
                     ),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: Colors.red.shade200),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        selectedAnswerIndex == question.correctAnswerIndex
-                            ? '✅ Correct!'
-                            : '💡 Explanation:',
+                      const Text(
+                        '❌ Find the mistake:',
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
-                          color: selectedAnswerIndex == question.correctAnswerIndex
-                              ? Colors.green
-                              : Colors.orange,
+                          color: Colors.red,
                         ),
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 12),
                       Text(
-                        question.explanation,
-                        style: const TextStyle(fontSize: 14),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        '✅ Correct: ${question.correctSentence}',
+                        question.incorrectSentence,
                         style: const TextStyle(
-                          fontSize: 14,
+                          fontSize: 20,
                           fontWeight: FontWeight.w500,
-                          color: Colors.green,
                         ),
                       ),
                     ],
                   ),
                 ),
+                
+                const SizedBox(height: 24),
+                
+                // Options
+                const Text(
+                  'Choose the correct word:',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                
+                // Options list - using shrinkWrap instead of Expanded
+                ListView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: question.options.length,
+                  itemBuilder: (context, index) {
+                    return _buildOptionButton(question, index);
+                  },
+                ),
+                
+                // Explanation
+                if (showExplanation) ...[
+                  const SizedBox(height: 16),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: selectedAnswerIndex == question.correctAnswerIndex
+                          ? Colors.green.shade50
+                          : Colors.orange.shade50,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: selectedAnswerIndex == question.correctAnswerIndex
+                            ? Colors.green
+                            : Colors.orange,
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          selectedAnswerIndex == question.correctAnswerIndex
+                              ? '✅ Correct!'
+                              : '💡 Explanation:',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: selectedAnswerIndex == question.correctAnswerIndex
+                                ? Colors.green
+                                : Colors.orange,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          question.explanation,
+                          style: const TextStyle(fontSize: 14),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          '✅ Correct: ${question.correctSentence}',
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.green,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+                
+                // Bottom padding to prevent content cutoff
+                const SizedBox(height: 32),
               ],
-            ],
+            ),
           ),
         );
       },

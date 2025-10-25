@@ -541,7 +541,7 @@ class DashboardPage extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
           _buildNavItem(Icons.home, true, () {}),
-          _buildNavItem(Icons.book_outlined, false, () => context.go('/lessons')),
+          _buildNavItem(Icons.book_outlined, false, () => context.go('/games')),
           _buildNavItem(Icons.quiz_outlined, false, () => context.go('/quiz')),
           _buildNavItem(Icons.translate, false, () => context.go('/vocabulary')),
           _buildNavItem(Icons.bar_chart, false, () => context.go('/progress')),

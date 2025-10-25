@@ -158,9 +158,9 @@ class _WordMatchPageState extends State<WordMatchPage>
           ElevatedButton(
             onPressed: () {
               Navigator.of(context).pop();
-              context.go('/lessons');
+              context.go('/games');
             },
-            child: const Text('Back to Lessons'),
+            child: const Text('Back to Games'),
           ),
         ],
       ),
@@ -202,7 +202,7 @@ class _WordMatchPageState extends State<WordMatchPage>
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.go('/lessons'),
+          onPressed: () => context.go('/games'),
         ),
         actions: [
           // Score display dengan animasi

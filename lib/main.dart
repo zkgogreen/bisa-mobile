@@ -6,13 +6,14 @@ import 'pages/home_page.dart';
 import 'pages/progress_overview_page.dart';
 import 'pages/leaderboard_page.dart';
 import 'pages/main_navigation.dart';
-import 'pages/lessons_page.dart';
+
 import 'pages/vocabulary_page.dart';
 import 'pages/quiz_page.dart';
 import 'pages/onboarding_page.dart';
 import 'pages/word_match_page.dart';
 import 'pages/grammar_rush_page.dart';
 import 'pages/memory_cards_page.dart';
+import 'pages/spelling_bee_page.dart';
 import 'pages/games_page.dart';
 import 'pages/courses_list_page.dart';
 import 'pages/course_detail_page.dart';
@@ -247,6 +248,14 @@ final GoRouter _router = GoRouter(
                 child: const MemoryCardsPage(),
               ),
             ),
+            // Spelling Bee Game
+            GoRoute(
+              path: '/spelling-bee',
+              pageBuilder: (context, state) => _buildPage(
+                state: state,
+                child: const SpellingBeePage(),
+              ),
+            ),
           ],
         ),
         
@@ -258,29 +267,7 @@ final GoRouter _router = GoRouter(
             child: const ProgressOverviewPage(),
           ),
         ),
-        
-        // Lessons - halaman pelajaran
-         GoRoute(
-           path: '/lessons',
-           pageBuilder: (context, state) => _buildPage(
-             state: state,
-             child: const LessonsPage(),
-           ),
-           routes: [
-             // Detail lesson dengan courseId dan moduleId
-             GoRoute(
-               path: '/:courseId/:moduleId/:lessonId',
-               pageBuilder: (context, state) => _buildPage(
-                 state: state,
-                 child: LessonPage(
-                   courseId: state.pathParameters['courseId']!,
-                   moduleId: state.pathParameters['moduleId']!,
-                   lessonId: state.pathParameters['lessonId']!,
-                 ),
-               ),
-             ),
-           ],
-         ),
+
         
         // Vocabulary - halaman kosakata
         GoRoute(

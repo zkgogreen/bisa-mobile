@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'spelling_bee_page.dart';
 
 // Halaman Games yang menampilkan semua mini games
 class GamesPage extends StatelessWidget {
@@ -7,6 +8,9 @@ class GamesPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final horizontalPadding = screenWidth > 600 ? 40.0 : 20.0;
+    
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
       appBar: AppBar(
@@ -23,29 +27,35 @@ class GamesPage extends StatelessWidget {
         ),
         centerTitle: true,
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Header section
-            _buildHeaderSection(),
-            
-            const SizedBox(height: 32),
-            
-            // Featured games section
-            _buildFeaturedGamesSection(context),
-            
-            const SizedBox(height: 32),
-            
-            // All games grid
-            _buildAllGamesSection(context),
-            
-            const SizedBox(height: 32),
-            
-            // Statistics section
-            _buildStatisticsSection(),
-          ],
+      body: SafeArea(
+        child: SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
+          child: Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: horizontalPadding,
+              vertical: 20,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Header section
+                _buildHeaderSection(),
+                
+                const SizedBox(height: 32),
+                
+                // All games grid
+                _buildAllGamesSection(context),
+                
+                const SizedBox(height: 32),
+                
+                // Statistics section
+                _buildStatisticsSection(),
+                
+                // Bottom padding for better scrolling
+                const SizedBox(height: 20),
+              ],
+            ),
+          ),
         ),
       ),
     );
@@ -136,58 +146,6 @@ class GamesPage extends StatelessWidget {
     );
   }
 
-  // Featured games section
-  Widget _buildFeaturedGamesSection(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          '⭐ Featured Games',
-          style: TextStyle(
-            fontSize: 22,
-            fontWeight: FontWeight.bold,
-            color: Color(0xFF1A1A1A),
-          ),
-        ),
-        const SizedBox(height: 16),
-        SizedBox(
-          height: 200,
-          child: ListView(
-            scrollDirection: Axis.horizontal,
-            children: [
-              _buildFeaturedGameCard(
-                context,
-                'Grammar Rush',
-                'Perbaiki kalimat dengan cepat!',
-                '⚡',
-                const Color(0xFFEC4899),
-                '/games/grammar-rush',
-                'Tingkatkan grammar dengan permainan cepat',
-              ),
-              _buildFeaturedGameCard(
-                context,
-                'Memory Cards',
-                'Ingat vocabulary dengan kartu',
-                '🧠',
-                const Color(0xFF10B981),
-                '/games/memory-cards',
-                'Latih memori dan vocabulary',
-              ),
-              _buildFeaturedGameCard(
-                context,
-                'Word Match',
-                'Cocokkan kata dengan gambar',
-                '🎯',
-                const Color(0xFF6366F1),
-                '/games/word-match',
-                'Belajar vocabulary dengan visual',
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
 
   // Featured game card
   Widget _buildFeaturedGameCard(
@@ -201,15 +159,15 @@ class GamesPage extends StatelessWidget {
   ) {
     return Container(
       width: 280,
-      margin: const EdgeInsets.only(right: 16),
+      margin: const EdgeInsets.only(right: 12, left: 4),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: color.withOpacity(0.2),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
+            color: color.withOpacity(0.15),
+            blurRadius: 15,
+            offset: const Offset(0, 6),
           ),
         ],
       ),
@@ -293,6 +251,10 @@ class GamesPage extends StatelessWidget {
 
   // All games section
   Widget _buildAllGamesSection(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final crossAxisCount = screenWidth > 600 ? 3 : 2;
+    final childAspectRatio = screenWidth > 600 ? 1.0 : 0.95;
+    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -305,48 +267,77 @@ class GamesPage extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 16),
-        GridView.count(
+        GridView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
-          crossAxisCount: 2,
-          crossAxisSpacing: 16,
-          mainAxisSpacing: 16,
-          childAspectRatio: 1.1,
-          children: [
-            _buildGameCard(
-              context,
-              'Word Match',
-              'Cocokkan kata dengan gambar',
-              Icons.extension,
-              const Color(0xFF6366F1),
-              '/games/word-match',
-              'Beginner',
-            ),
-            _buildGameCard(
-              context,
-              'Grammar Rush',
-              'Perbaiki kalimat cepat',
-              Icons.speed,
-              const Color(0xFFEC4899),
-              '/games/grammar-rush',
-              'Intermediate',
-            ),
-            _buildGameCard(
-              context,
-              'Memory Cards',
-              'Ingat vocabulary',
-              Icons.psychology,
-              const Color(0xFF10B981),
-              '/games/memory-cards',
-              'All Levels',
-            ),
-            _buildComingSoonCard(
-              'Spelling Bee',
-              'Eja kata dengan benar',
-              Icons.spellcheck,
-              const Color(0xFFF59E0B),
-            ),
-          ],
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: crossAxisCount,
+            crossAxisSpacing: 16,
+            mainAxisSpacing: 16,
+            childAspectRatio: childAspectRatio,
+          ),
+          itemCount: 4,
+          itemBuilder: (context, index) {
+            final games = [
+              {
+                'title': 'Word Match',
+                'description': 'Cocokkan kata dengan gambar',
+                'icon': Icons.extension,
+                'color': const Color(0xFF6366F1),
+                'route': '/games/word-match',
+                'level': 'Beginner',
+                'isComingSoon': false,
+              },
+              {
+                'title': 'Grammar Rush',
+                'description': 'Perbaiki kalimat cepat',
+                'icon': Icons.speed,
+                'color': const Color(0xFFEC4899),
+                'route': '/games/grammar-rush',
+                'level': 'Intermediate',
+                'isComingSoon': false,
+              },
+              {
+                'title': 'Memory Cards',
+                'description': 'Ingat vocabulary',
+                'icon': Icons.psychology,
+                'color': const Color(0xFF10B981),
+                'route': '/games/memory-cards',
+                'level': 'All Levels',
+                'isComingSoon': false,
+              },
+              {
+                'title': 'Spelling Bee',
+                'description': 'Eja kata dengan benar',
+                'icon': Icons.spellcheck,
+                'color': const Color(0xFFF59E0B),
+                'route': '/games/spelling-bee',
+                'level': 'All Levels',
+                'isComingSoon': false,
+              },
+            ];
+            
+            final game = games[index];
+            
+            if (game['isComingSoon'] as bool) {
+              return _buildComingSoonCard(
+                game['title'] as String,
+                game['description'] as String,
+                game['icon'] as IconData,
+                game['color'] as Color,
+              );
+            } else {
+              return _buildGameCard(
+                context,
+                game['title'] as String,
+                game['description'] as String,
+                game['icon'] as IconData,
+                game['color'] as Color,
+                game['route'] as String,
+                game['level'] as String,
+              );
+            }
+          },
         ),
       ],
     );
