@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 /// Provider untuk autentikasi sederhana menggunakan email dan password
 /// Menyimpan data user di SharedPreferences (local storage)
@@ -164,9 +166,74 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
+  /// Google Sign-In dengan Firebase Auth
+  Future<bool> signInWithGoogle() async {
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      // Inisialisasi Google Sign-In
+      final GoogleSignIn googleSignIn = GoogleSignIn();
+      
+      // Trigger Google Sign-In flow
+      final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
+      
+      if (googleUser == null) {
+        // User membatalkan sign-in
+        _isLoading = false;
+        notifyListeners();
+        return false;
+      }
+
+      // Dapatkan auth details dari request
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+
+      // Buat credential untuk Firebase
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      // Sign in ke Firebase dengan Google credential
+      final UserCredential userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
+      final User? user = userCredential.user;
+
+      if (user != null) {
+        // Set data user dari Google account
+        _isLoggedIn = true;
+        _userEmail = user.email;
+        _userDisplayName = user.displayName ?? _extractNameFromEmail(user.email ?? '');
+        _userPhotoURL = user.photoURL ?? _generateAvatarUrl(user.email ?? '');
+
+        // Simpan ke SharedPreferences
+        await _saveUserData();
+
+        _isLoading = false;
+        notifyListeners();
+        return true;
+      } else {
+        _isLoading = false;
+        notifyListeners();
+        return false;
+      }
+    } catch (e) {
+      debugPrint('Error during Google sign in: $e');
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
   /// Logout user
   Future<void> signOut() async {
     try {
+      // Logout dari Firebase Auth
+      await FirebaseAuth.instance.signOut();
+      
+      // Logout dari Google Sign-In
+      final GoogleSignIn googleSignIn = GoogleSignIn();
+      await googleSignIn.signOut();
+
       _isLoggedIn = false;
       _userEmail = null;
       _userDisplayName = null;

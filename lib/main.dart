@@ -24,12 +24,16 @@ import 'pages/mentor_page.dart';
 import 'pages/mentor_detail_page.dart';
 import 'pages/login_page.dart';
 import 'providers/auth_provider.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 
 /// Entry point aplikasi BisaBasa
 /// Aplikasi pembelajaran bahasa Inggris dengan sistem autentikasi sederhana
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   print('🚀 Memulai aplikasi BisaBasa...');
   
   runApp(const BisaBasaApp());

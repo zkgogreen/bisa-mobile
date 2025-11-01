@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../models/course.dart';
@@ -179,61 +180,297 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
     );
   }
 
-  // Widget untuk sliver app bar dengan image
+  // Widget untuk sliver app bar dengan image yang lebih modern
   Widget _buildSliverAppBar() {
     return SliverAppBar(
-      expandedHeight: 250,
+      expandedHeight: 320, // Tinggi diperbesar untuk tampilan yang lebih dramatis
       pinned: true,
+      stretch: true, // Memungkinkan stretch effect saat scroll ke atas
       backgroundColor: const Color(0xFF2196F3),
       foregroundColor: Colors.white,
+      elevation: 0,
+      // Custom leading button dengan blur effect
+      leading: Container(
+        margin: const EdgeInsets.all(8),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(12),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.black.withOpacity(0.3),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: IconButton(
+                icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
+                onPressed: () => Navigator.of(context).pop(),
+              ),
+            ),
+          ),
+        ),
+      ),
+      // Custom actions dengan blur effect
+      actions: [
+        Container(
+          margin: const EdgeInsets.all(8),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(0.3),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: IconButton(
+                  icon: const Icon(Icons.share, color: Colors.white),
+                  onPressed: () {
+                    // Implementasi share functionality
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Share feature coming soon!'),
+                        behavior: SnackBarBehavior.floating,
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
+          ),
+        ),
+        Container(
+          margin: const EdgeInsets.only(right: 8, top: 8, bottom: 8),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(0.3),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: IconButton(
+                  icon: const Icon(Icons.bookmark_border, color: Colors.white),
+                  onPressed: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Bookmark feature coming soon!'),
+                        behavior: SnackBarBehavior.floating,
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
       flexibleSpace: FlexibleSpaceBar(
+        stretchModes: const [
+          StretchMode.zoomBackground,
+          StretchMode.blurBackground,
+        ],
         background: Stack(
           fit: StackFit.expand,
           children: [
-            // Course image
-            Image.network(
-              _course!.imageUrl,
-              fit: BoxFit.cover,
+            // Course image dengan hero animation
+            Hero(
+              tag: 'course-image-${_course!.id}',
+              child: Image.network(
+                _course!.imageUrl,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) {
+                  return Container(
+                    color: Colors.grey[300],
+                    child: const Icon(
+                      Icons.image_not_supported,
+                      size: 64,
+                      color: Colors.grey,
+                    ),
+                  );
+                },
+              ),
             ),
             
-            // Gradient overlay
+            // Gradient overlay yang lebih kompleks
             Container(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
+                  stops: const [0.0, 0.3, 0.7, 1.0],
                   colors: [
+                    Colors.black.withOpacity(0.1),
                     Colors.transparent,
-                    Colors.black.withOpacity(0.7),
+                    Colors.black.withOpacity(0.3),
+                    Colors.black.withOpacity(0.8),
                   ],
                 ),
               ),
             ),
             
-            // Level badge
+            // Positioned elements dengan animasi
             Positioned(
-              top: 100,
+              bottom: 80,
+              left: 16,
+              right: 16,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Category badge dengan styling yang lebih baik
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF2196F3).withOpacity(0.9),
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.2),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          _getCategoryIcon(_course!.category),
+                          size: 16,
+                          color: Colors.white,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          _course!.category,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  
+                  const SizedBox(height: 12),
+                  
+                  // Course title dengan shadow
+                  Text(
+                    _course!.title,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                      shadows: [
+                        Shadow(
+                          color: Colors.black.withOpacity(0.5),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ),
+            
+            // Level badge dengan posisi yang lebih baik
+            Positioned(
+              top: 120,
               right: 16,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 decoration: BoxDecoration(
                   color: _getLevelColor(_course!.level),
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: _getLevelColor(_course!.level).withOpacity(0.3),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
                 ),
-                child: Text(
-                  _course!.level,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                  ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      _getLevelIcon(_course!.level),
+                      size: 16,
+                      color: Colors.white,
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      _course!.level,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
+            
+            // Students count badge (alternative to rating)
+             Positioned(
+               top: 120,
+               left: 16,
+               child: Container(
+                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                 decoration: BoxDecoration(
+                   color: Colors.green,
+                   borderRadius: BorderRadius.circular(16),
+                   boxShadow: [
+                     BoxShadow(
+                       color: Colors.green.withOpacity(0.3),
+                       blurRadius: 8,
+                       offset: const Offset(0, 2),
+                     ),
+                   ],
+                 ),
+                 child: Row(
+                   mainAxisSize: MainAxisSize.min,
+                   children: [
+                     const Icon(
+                       Icons.people,
+                       size: 16,
+                       color: Colors.white,
+                     ),
+                     const SizedBox(width: 4),
+                     Text(
+                       '${_course!.totalLessons} Lessons',
+                       style: const TextStyle(
+                         color: Colors.white,
+                         fontSize: 12,
+                         fontWeight: FontWeight.w600,
+                       ),
+                     ),
+                   ],
+                 ),
+               ),
+             ),
           ],
         ),
       ),
     );
+  }
+
+  // Helper method untuk mendapatkan icon berdasarkan level
+  IconData _getLevelIcon(String level) {
+    switch (level) {
+      case 'Beginner':
+        return Icons.school;
+      case 'Intermediate':
+        return Icons.trending_up;
+      case 'Advanced':
+        return Icons.emoji_events;
+      default:
+        return Icons.help_outline;
+    }
   }
 
   // Widget untuk course info section

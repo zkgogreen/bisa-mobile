@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "763597806647",
+    "project_id": "bisabasa",
+    "storage_bucket": "bisabasa.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:763597806647:android:0d3779280ab7523be973b2",
+        "android_client_info": {
+          "package_name": "com.example.bisabasa"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCakZlgaKCRzFofroCNHT1CincEkxJR7tk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

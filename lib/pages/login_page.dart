@@ -128,6 +128,26 @@ class _LoginPageState extends State<LoginPage>
     }
   }
 
+  /// Handle Google Sign-In
+  void _handleGoogleSignIn() async {
+    setState(() {
+      _errorMessage = '';
+    });
+
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final success = await authProvider.signInWithGoogle();
+
+    if (success) {
+      if (mounted) {
+        context.go('/');
+      }
+    } else {
+      setState(() {
+        _errorMessage = 'Gagal masuk dengan Google. Silakan coba lagi.';
+      });
+    }
+  }
+
   /// Fungsi untuk toggle antara mode login dan register
   void _toggleMode() {
     setState(() {
@@ -263,6 +283,10 @@ class _LoginPageState extends State<LoginPage>
                                       _buildErrorMessage(),
                                       const SizedBox(height: 20),
                                       _buildSubmitButton(),
+                                      const SizedBox(height: 16),
+                                      _buildDivider(),
+                                      const SizedBox(height: 16),
+                                      _buildGoogleSignInButton(),
                                       const SizedBox(height: 12),
                                       _buildToggleModeButton(),
                                     ],
@@ -492,6 +516,88 @@ class _LoginPageState extends State<LoginPage>
                       letterSpacing: 0.5,
                     ),
                   ),
+          ),
+        );
+      },
+    );
+  }
+
+  /// Widget untuk divider "atau"
+  Widget _buildDivider() {
+    return Row(
+      children: [
+        Expanded(
+          child: Divider(
+            color: Colors.grey.shade400,
+            thickness: 1,
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Text(
+            'atau',
+            style: TextStyle(
+              color: Colors.grey.shade600,
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ),
+        Expanded(
+          child: Divider(
+            color: Colors.grey.shade400,
+            thickness: 1,
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Widget untuk tombol Google Sign-In
+  Widget _buildGoogleSignInButton() {
+    return Consumer<AuthProvider>(
+      builder: (context, authProvider, child) {
+        return SizedBox(
+          width: double.infinity,
+          height: 44,
+          child: OutlinedButton.icon(
+            onPressed: authProvider.isLoading ? null : _handleGoogleSignIn,
+            style: OutlinedButton.styleFrom(
+              backgroundColor: Colors.white,
+              foregroundColor: Colors.grey.shade700,
+              side: BorderSide(color: Colors.grey.shade300, width: 1),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              elevation: 2,
+            ),
+            icon: authProvider.isLoading
+                ? const SizedBox(
+                    height: 20,
+                    width: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.grey),
+                    ),
+                  )
+                : Container(
+                    width: 20,
+                    height: 20,
+                    decoration: const BoxDecoration(
+                      image: DecorationImage(
+                        image: NetworkImage('https://developers.google.com/identity/images/g-logo.png'),
+                        fit: BoxFit.contain,
+                      ),
+                    ),
+                  ),
+            label: Text(
+              'Masuk dengan Google',
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                letterSpacing: 0.5,
+              ),
+            ),
           ),
         );
       },
