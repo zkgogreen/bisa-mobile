@@ -172,30 +172,11 @@ class AuthProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      // Inisialisasi Google Sign-In
-      final GoogleSignIn googleSignIn = GoogleSignIn();
-      
-      // Trigger Google Sign-In flow
-      final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
-      
-      if (googleUser == null) {
-        // User membatalkan sign-in
-        _isLoading = false;
-        notifyListeners();
-        return false;
-      }
-
-      // Dapatkan auth details dari request
-      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
-
-      // Buat credential untuk Firebase
-      final credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
+      // Untuk platform web, kita gunakan Firebase Auth signInWithPopup secara langsung
+      // Karena GoogleSignIn tidak sepenuhnya support di web
+      final UserCredential userCredential = await FirebaseAuth.instance.signInWithPopup(
+        GoogleAuthProvider(),
       );
-
-      // Sign in ke Firebase dengan Google credential
-      final UserCredential userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
       final User? user = userCredential.user;
 
       if (user != null) {
@@ -229,10 +210,6 @@ class AuthProvider with ChangeNotifier {
     try {
       // Logout dari Firebase Auth
       await FirebaseAuth.instance.signOut();
-      
-      // Logout dari Google Sign-In
-      final GoogleSignIn googleSignIn = GoogleSignIn();
-      await googleSignIn.signOut();
 
       _isLoggedIn = false;
       _userEmail = null;
